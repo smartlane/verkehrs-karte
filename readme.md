@@ -1,5 +1,8 @@
-Quellcode von http://hier-fehlt-ein-baum.de/
+# Verkehrskarte.de
 
+Verkehrskarte.de stellt aktuelle Baustelleninformationen für Moers dar. Ziel ist es über Schnittstellen zukünftig Informationen für weitere Städte anzubinden.
+
+####Copyrightfu
 Copyright (c) 2014 Ernesto Ruge
 
 Hiermit wird unentgeltlich jeder Person, die eine Kopie der Software und
