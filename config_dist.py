@@ -20,7 +20,20 @@ BASIC_AUTH_REALM = 'Bitte geben Sie Nutzername und Passwort fuer das Admin-Inter
 
 CITY = [
   {
+    'id': 1,
     'title': 'Moers',
+    'lat': 51.451117,
+    'lon': 6.629194
+  },
+  {
+    'id': 2,
+    'title': 'Bochum',
+    'lat': 51.451117,
+    'lon': 6.629194
+  },
+  {
+    'id': 3,
+    'title': 'Aachen',
     'lat': 51.451117,
     'lon': 6.629194
   }
@@ -29,6 +42,17 @@ CITY = [
 SOURCE = [
   {
     'title': 'ENNI',
-    'website': 'https://www.enni.de/enni-gruppe/hier-bauen-wir.html'
+    'website': 'https://www.enni.de/enni-gruppe/hier-bauen-wir.html',
+    'city_id': 1
+  },
+  {
+    'title': 'Bochum',
+    'website': '',
+    'city_id': 1
+  },
+  {
+    'title': 'Aachen',
+    'website': 'http://www.bsis.regioit.de/geoserver/BSISPROD/wms?service=wfs&version=2.0.0&request=GetFeature&typeNames=BSISPROD:Baustellen_7Tage_Punkte&outputFormat=json',
+    'city_id': 1
   }
 ]

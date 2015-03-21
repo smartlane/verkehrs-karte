@@ -16,8 +16,8 @@ var current_construction_id = null;
 
 $(document).ready(function() {
   if ($('#map').exists()) {
-    var GreenIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/js/images/marker-icon-green.png' } });
-    greenIcon = new GreenIcon();
+    var ConstructionIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/img/under_construction_icon.png', iconSize: [40, 35] } });
+    constructionIcon = new ConstructionIcon();
     var RedIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/js/images/marker-icon-red.png' } });
     redIcon = new RedIcon();
     var PinkIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/js/images/marker-icon-pink.png' } });
@@ -31,8 +31,8 @@ $(document).ready(function() {
       minZoom: 4,
       attribution: 'Map Data &copy; <a href="http://www.openstreetmap.org">OpenStreetMap</a> contributors, Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a>.'
     });
-    map.setView(new L.LatLng(51.481845, 7.216236), 13).addLayer(backgroundLayer);
-    $.getJSON('/static/js/bochum.json', function(result) {
+    map.setView(new L.LatLng(51.451117, 6.629194), 13).addLayer(backgroundLayer);
+    /*$.getJSON('/static/js/bochum.json', function(result) {
       route = L.geoJson(result, {
         style: {
           'color': "#000000",
@@ -40,7 +40,7 @@ $(document).ready(function() {
           'opacity': 0.65
         }
       }).addTo(map);
-    });
+    });*/
     if ($('#flashes').exists())
       close_sidebar();
     get_construction_sites();
@@ -57,7 +57,7 @@ function get_construction_sites() {
     else
       markers.clearLayers();
     $.each(result['response'], function(key, construction) {
-      marker = L.marker([construction['lat'], construction['lng']], {icon: blueIcon, title: construction.id});
+      marker = L.marker([construction['lat'], construction['lng']], {icon: constructionIcon, title: construction.id});
       marker.on('click', function (current_marker) {
         if ($('#flashes').exists())
           $('#flashes').remove();
@@ -69,13 +69,16 @@ function get_construction_sites() {
           var html = '<span id="close-sidebar" onclick="close_sidebar();">schließen</span>';
           html += '<h2>Details</h2>';
           
-          html += '<h3>Start</h3><p>' + type_values[construction['begin']] + '</p>';
-          html += '<h3>Ende</h3><p>' + type_values[construction['end']] + '</p>';
+          if (construction['begin'])
+            html += '<h3>Start</h3><p>' + construction['begin'] + '</p>';
+          html += '<h3>Ende</h3><p>' + construction['end'] + '</p>';
           
-          html += '<h3>Beschreibung</h3><p>' + type_values[construction['end']] + '</p>';
-          html += '<h3>Beschreibung</h3><p>' + type_values[construction['end']] + '</p>';
-          html += '<h3>Bauherr</h3><p>' + type_values[construction['constructor']] + '</p>';
-          html += '<h3>Bauunternehmen</h3><p>' + type_values[construction['execution']] + '</p>';
+          if (construction['descr'])
+            html += '<h3>Beschreibung</h3><p>' + construction['descr'] + '</p>';
+          html += '<h3>Ort</h3><p>' + construction['position_descr'] + '</p>';
+          html += '<h3>Bauherr</h3><p>' + construction['constructor'] + '</p>';
+          if (construction['execution'])
+            html += '<h3>Bauunternehmen</h3><p>' + construction['execution'] + '</p>';
           
           $('#details').html(html);
         });

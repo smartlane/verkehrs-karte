@@ -42,7 +42,7 @@ def index():
 @app.route("/construction-list")
 def construction_list():
   start_time = time.time()
-  constructions = ConstructionSite.query.filter_by(public=1).all()
+  constructions = ConstructionSite.query.all()
   result = []
   for construction in constructions:
     result.append({

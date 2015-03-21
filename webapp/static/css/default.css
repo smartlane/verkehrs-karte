@@ -9,11 +9,11 @@
   display: block;
   float: left;
   margin-top: 4px;
-  padding-right: 8px;
 }
 
 #logo img {
   margin-top: -3px;
+  margin-left: 5px;
 }
 
 #navbar a, navbar a:hover {
