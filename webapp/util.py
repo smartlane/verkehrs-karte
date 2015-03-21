@@ -36,6 +36,8 @@ import requests
 import utm
 from models import *
 from webapp import app, db
+from lxml import etree, html
+from lxml.cssselect import CSSSelector
 
 def rfc1123date(value):
   """
@@ -55,11 +57,25 @@ def cache_max_age(hours):
   seconds = hours * 60 * 60
   return 'max-age=' + str(seconds)
 
-def sync_gis():
-  request_cookie = requests.get(app.config['GIS_URL_COOKIE'])
-  request_data = requests.get(app.config['GIS_URL_DATA'], cookies=request_cookie.cookies)
-  data = request_data.json()['features']
-  for dataset in data:
+def sync_moers():
+  request_data = requests.get(app.config['SOURCE'][0]['site'])
+  doc = html.fromstring(request_data.content)
+  table_trs_select = CSSSelector("#c6559 tr")
+  table_trs = table_trs_select(doc)
+  data = {}
+  for table_tr in table_trs:
+    if len(table_tr[1]) and table_tr[0][0].text:
+      new_construction = ConstructionSite()
+      new_construction.position_descr = table_tr[0][0].text
+      new_construction.descr = table_tr[2][0].text
+      new_construction.constructor = table_tr[3][0].text
+      new_construction.created_at = datetime.datetime.now()
+      new_construction.updated_at = datetime.datetime.now()
+      new_construction.source = 1
+      db.session.add(new_construction)
+      db.session.commit()
+  """
+    print table_tr
     if Tree.query.filter_by(external_id=dataset['attributes']['OBJECTID']).count() == 0:
       print "Add new Dataset with external ID %s" % dataset['attributes']['OBJECTID']
       new_tree = Tree()
@@ -88,6 +104,8 @@ def sync_gis():
       new_tree.source = 'Stadt Bochum'
       db.session.add(new_tree)
       db.session.commit()
+  """
+
 
 def geocode(location_string):
   """
@@ -98,8 +116,8 @@ def geocode(location_string):
   params = {'format': 'json',  # json
             'q': location_string,
             'addressdetails': 1,
-            'accept-language': 'de_DE',
-            'countrycodes': app.config['GEOCODING_DEFAULT_COUNTRY']}
+            'accept-language': 'de_DE'}#,
+            #'countrycodes': app.config['GEOCODING_DEFAULT_COUNTRY']}
   request = urllib2.urlopen(url + '?' + urllib.urlencode(params))
   response = request.read()
   addresses = json.loads(response)
@@ -112,8 +130,8 @@ def geocode(location_string):
     # skip if not in correct county
     if 'county' not in address['address']:
       continue
-    if address['address']['county'] != app.config['GEOCODING_FILTER_COUNTY']:
-      continue
+    #if address['address']['county'] != app.config['GEOCODING_FILTER_COUNTY']:
+    #  continue
     addresses_out.append(address)
   return addresses_out
 

@@ -8,8 +8,8 @@ from webapp import util
 manager = Manager(app)
 
 @manager.command
-def sync_gis():
-  util.sync_gis()
+def sync_moers():
+  util.sync_moers()
 
 if __name__ == "__main__":
   manager.run()
