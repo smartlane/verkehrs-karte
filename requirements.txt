@@ -9,3 +9,4 @@ Flask-Security
 utm
 python-memcached
 requests
+bson
