@@ -12,35 +12,46 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Typ</th>
-        <th>Straße</th>
+        <th>Titel</th>
         <th>Beschreibung</th>
-        <th>Bild</th>
-        <th>Autor</th>
+        <th>Bauherr</th>
+        <th>Bauunternehmen</th>
+        <th>Ort</th>
         <th>Funktionen</th>
+        <th>Quelle</th>
+        <th>Start</th>
+        <th>Ende</th>
       </tr>
     </thead>
     <tfoot>
       <tr>
         <th>ID</th>
-        <th>Typ</th>
-        <th>Straße</th>
+        <th>Titel</th>
         <th>Beschreibung</th>
-        <th>Bild</th>
-        <th>Autor</th>
+        <th>Bauherr</th>
+        <th>Bauunternehmen</th>
+        <th>Ort</th>
         <th>Funktionen</th>
+        <th>Quelle</th>
+        <th>Start</th>
+        <th>Ende</th>
       </tr>
     </tfoot>
     <tbody>
-      {% for tree in trees %}
+      {% for construction in constructions %}
       <tr>
-        <td>{{ tree.id }}</td>
-        <td><img src="/static/js/images/{{ tree.type|deref_type }}" /></td>
-        <td>{{ tree.address }}</td>
-        <td>{{ tree.descr }}</td>
-        <td class="admin-picture">{% if tree.picture %}<span>zeigen<img src="/static/img/tree/{{ tree.id }}-small.jpg" /></span>{% else %}-{% endif %}</td>
+        <td>{{ construction.id }}</td>
+        <td>{{ construction.title }}</td>
+        <td>{{ construction.descr }}</td>
+        <td>{{ construction.reason }}</td>
+        <td>{{ construction.constructor }}</td>
+        <td>{{ construction.execution }}</td>
+        <td>{{ construction.position_descr }}</td>
+        <td>{{ construction.source }}</td>
+        <td>{{ construction.begin }}</td>
+        <td>{{ construction.end }}</td>
         <td>{{ tree.author }}<br /><a href="mailto:{{ tree.email }}">{{ tree.email }}</a></td>
-        <td class="admin-action"><span onclick="update_value($(this), {'type': 'update', 'tree_id': {{ tree.id }}, 'field': 'public', 'value': '{{ '0' if tree.public else '1' }}' });">{{ 'depublizieren' if tree.public else 'publizieren' }}</span></td>
+        <!-- <td class="admin-action"><span onclick="update_value($(this), {'type': 'update', 'tree_id': {{ tree.id }}, 'field': 'public', 'value': '{{ '0' if tree.public else '1' }}' });">{{ 'depublizieren' if tree.public else 'publizieren' }}</span></td> -->
       </tr>
       {% endfor %}
     </tbody>

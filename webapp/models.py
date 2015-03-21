@@ -16,7 +16,7 @@ class ConstructionSite (db.Model):
   reason = db.Column(db.Text()) # Begründung für Baustelle
   constructor = db.Column(db.Text()) # Bauherr
   execution = db.Column(db.Text()) # Ausführendes Bauunternehmen
-  position_descr = db.Column(db.Text()) # Ausführendes Bauunternehmen
+  position_descr = db.Column(db.Text()) # Ort
   
   source = db.Column(db.Integer()) # Quelle, definiert in config
   
