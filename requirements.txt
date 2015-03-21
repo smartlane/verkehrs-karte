@@ -10,3 +10,4 @@ utm
 python-memcached
 requests
 bson
+sqlalchemy-migrate
