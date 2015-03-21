@@ -5,61 +5,38 @@ from webapp import db
 
 Base = declarative_base()
 
-class Tree(db.Model):
-  __tablename__ = 'tree'
+class ConstructionSite (db.Model):
+  __tablename__ = 'construction_site'
   
   id = db.Column(db.Integer(), primary_key=True)
   
-  type = db.Column(db.Integer())
-  public = db.Column(db.Integer())
-  author = db.Column(db.String(255))
-  email = db.Column(db.String(255))
+  title = db.Column(db.String(255))
   
-  ip = db.Column(db.String(15))
-  hostname = db.Column(db.String(255))
+  descr = db.Column(db.Text()) # Allg. Beschreibung
+  reason = db.Column(db.Text()) # Begründung für Baustelle
+  constructor = db.Column(db.Text()) # Bauherr
+  execution = db.Column(db.Text()) # Ausführendes Bauunternehmen
+  position_descr = db.Column(db.Text()) # Ausführendes Bauunternehmen
   
-  address = db.Column(db.String(255))
-  postalcode = db.Column(db.String(255))
-  city = db.Column(db.String(255))
+  source = db.Column(db.Integer()) # Quelle, definiert in config
   
-  picture = db.Column(db.Integer())
-  descr = db.Column(db.Text())
+  area = db.Column(db.Text()) # GeoJSON
+  city = db.Column(db.Integer()) # City ID, definiert in config
   
   lat = db.Column(db.Numeric(precision=10,scale=7))
   lng = db.Column(db.Numeric(precision=10,scale=7))
   
-  external_id = db.Column(db.String(255))
+  # external_id = db.Column(db.String(255))
+  
+  begin = db.Column(db.DateTime())
+  end = db.Column(db.DateTime())
+  
   created_at = db.Column(db.DateTime())
   updated_at = db.Column(db.DateTime())
   
-  tree_type_old = db.Column(db.String(255))
-  tree_type_new = db.Column(db.String(255))
-  chop_reason = db.Column(db.String(255))
-  source = db.Column(db.String(255))
-  
-  tree_suggest = db.relationship('TreeSuggest', backref='tree', lazy='dynamic')
-  
   def __init__(self):
     pass
 
   def __repr__(self):
-    return '<Tree %r>' % self.id
+    return '<ConstructionSite %r>' % self.id
 
-class TreeSuggest(db.Model):
-  __tablename__ = 'tree_suggest'
-  
-  id = db.Column(db.Integer(), primary_key=True)
-  
-  tree_id = db.Column(db.Integer(), db.ForeignKey('tree.id'))
-  field = db.Column(db.String(255))
-  value = db.Column(db.String(255))
-  created_at = db.Column(db.DateTime())
-  
-  ip = db.Column(db.String(15))
-  hostname = db.Column(db.String(255))
-  
-  def __init__(self):
-    pass
-
-  def __repr__(self):
-    return '<TreeSuggest %r>' % self.id
