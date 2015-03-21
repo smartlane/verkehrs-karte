@@ -39,17 +39,16 @@ import socket
 def index():
   return render_template('index.html')
 
-@app.route("/tree-list")
-def tree_list():
+@app.route("/construction-list")
+def construction_list():
   start_time = time.time()
-  trees = Tree.query.filter_by(public=1).all()
+  constructions = ConstructionSite.query.filter_by(public=1).all()
   result = []
-  for tree in trees:
+  for construction in constructions:
     result.append({
-      'id': tree.id,
-      'lat': tree.lat,
-      'lng': tree.lng,
-      'type': tree.type
+      'id': construction.id,
+      'lat': construction.lat,
+      'lng': construction.lng
     })
   ret = {
     'status': 0,
@@ -65,27 +64,29 @@ def tree_list():
   response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
   return(response)
   
-@app.route("/tree-details")
-def tree_details():
+@app.route("/construction-details")
+def construction_details():
   start_time = time.time()
   try:
-    tree_id = int(request.args.get('id'))
+    construction_id = int(request.args.get('id'))
   except ValueError:
     abort(500)
-  tree = Tree.query.filter_by(id=tree_id).first_or_404()
+  construction = ConstructionSite.query.filter_by(id=construction_id).first_or_404()
   result = {
-    'id': tree.id,
-    'address': tree.address,
-    'postalcode': tree.postalcode,
-    'city': tree.city,
-    'descr': tree.descr,
-    'picture': tree.picture,
-    'lat': tree.lat,
-    'lng': tree.lng,
-    'chop_reason': tree.chop_reason,
-    'type': tree.type,
-    'source': tree.source,
-    'tree_type_old': tree.tree_type_old
+    'id': construction.id,
+    'title': construction.title,
+    'city': construction.city,
+    'descr': construction.descr,
+    'position_descr': construction.position_descr,
+    'constructor': construction.constructor,
+    'reason': construction.reason,
+    'execution': construction.execution,
+    'lat': construction.lat,
+    'lng': construction.lng,
+    'source': construction.source,
+    'area': construction.area,
+    'begin': construction.begin,
+    'end': construction.end
   }
   ret = {
     'status': 0,
@@ -101,7 +102,7 @@ def tree_details():
   response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
   return(response)
 
-@app.route("/new-tree", methods=['GET', 'POST'])
+'''@app.route("/new-tree", methods=['GET', 'POST'])
 def new_tree():
   tree = Tree()
   tree_form = NewTree(request.form, tree)
@@ -132,7 +133,9 @@ def new_tree():
     flash(u'Eintrag wurde gespeichert und wird nun geprüft. Danke fürs Mitwirken!')
     return redirect("/")
   return render_template('new-tree.html', tree_form=tree_form)
+'''
 
+'''
 @app.route('/tree-suggest', methods=['GET', 'POST'])
 def tree_suggest():
   start_time = time.time()
@@ -177,7 +180,7 @@ def tree_suggest():
   response.headers['Expires'] = -1
   response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
   return(response)
-
+'''
 
 @app.route("/information")
 def information():
@@ -198,8 +201,8 @@ def anleitung():
 @app.route("/admin")
 @basic_auth.required
 def admin():
-  trees = Tree.query.all()
-  return render_template('admin.html', trees=trees)
+  constructions = ConstructionSite.query.all()
+  return render_template('admin.html', constructions=constructions)
 
 @app.route("/admin/suggest")
 @basic_auth.required
