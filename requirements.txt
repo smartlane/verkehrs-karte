@@ -11,3 +11,5 @@ python-memcached
 requests
 bson
 sqlalchemy-migrate
+lxml
+cssselect
