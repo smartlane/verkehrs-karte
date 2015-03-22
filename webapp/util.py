@@ -105,6 +105,24 @@ def sync_moers():
       db.session.add(new_tree)
       db.session.commit()
   """
+def sync_rostock():
+    response = urllib.urlopen("https://geo.sv.rostock.de/download/opendata/baustellen/baustellen.json")
+    data = json.loads(response.read())
+    for construction in data["features"]:
+        new_construction = ConstructionSite()
+        new_construction.position_descr = construction["properties"]["strasse_name"]
+        new_construction.descr = construction["properties"]["sperrung_art"] + " - " + construction["properties"]["sperrung_grund"]
+        new_construction.constructor = construction["properties"]["gemeinde_name"]
+        new_construction.execution = construction["properties"]["durchfuehrung"]
+        new_construction.source = 2
+        new_construction.lat = construction["geometry"]["coordinates"][1]
+        new_construction.lng = construction["geometry"]["coordinates"][0]
+        new_construction.begin = construction["properties"]["sperrung_anfang"]
+        new_construction.end = construction["properties"]["sperrung_ende"]
+        new_construction.created_at = datetime.datetime.now()
+        new_construction.updated_at = datetime.datetime.now()
+        db.session.add(new_construction)
+        db.session.commit()
 
 
 def geocode(location_string):
