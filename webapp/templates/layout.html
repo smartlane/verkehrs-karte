@@ -1,5 +1,5 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}Baustellenkarte{% endblock %}
+{% block title %}Mobil Bei Uns{% endblock %}
 
 {% block styles %}
 {{super()}}
@@ -27,16 +27,29 @@
 </script>
 <noscript><p><img src="http://piwik.sectio-aurea.org/piwik.php?idsite=63" style="border:0;" alt="" /></p></noscript>
 <!-- End Piwik Code -->
+<script type="text/javascript">
+regions = {{ dumps(config['REGIONS'].copy())|safe }}
+</script>
 {% endblock %}
 
 {% block navbar %}
 <div id="navbar" class="navbar navbar-fixed-top">
-  <p id="logo"><span>Ein Projekt von<a rel="lightbox" href="/static/img/ruhrmobil.png"><img alt="ruhrmobil-E e.V." src="/static/img/ruhrmobil-invers.png"></a></p>
+  <div id="region">
+    <form id="region-form" method="post">
+      <select id="region-select" name="region-select">
+        {% for region_id, region in config['REGION_DATA'].iteritems() %}
+        <option value="{{ region_id }}">{{ region['name'] }}</option>
+        {% if region['children'] %}{% for subregion_id, subregion in region['children'].iteritems() %}
+        <option class="subregion" value="{{ subregion_id }}">{{ subregion['name'] }}</option>
+        {% endfor %}{% endif %}
+        {% endfor %}
+      </select>
+    </form>
+  </div>
   <ul>
     <li><a href="/">Start</a></li>
-    <!--li><a href="/new-tree">Neuer Baum</a></li-->
     <li><a href="/information">Infos</a></li>
-    <!--li id="tutorial"><a href="/anleitung">Anleitung</a></li-->
+    <li><a href="/datenquellen">Daten</a></li>
     <li><a href="/impressum">Impressum</a></li>
   </ul>
 </div>

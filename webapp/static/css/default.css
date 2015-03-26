@@ -1,19 +1,12 @@
 
-#logo {
+#region {
   float: right;
   color: #FFFFFF;
   margin-bottom: 0;
 }
 
-#logo span {
-  display: block;
-  float: left;
-  margin-top: 4px;
-}
-
-#logo img {
-  margin-top: -3px;
-  margin-left: 5px;
+#region .subregion {
+  color: #999999;
 }
 
 #navbar a, navbar a:hover {

@@ -8,12 +8,9 @@ from webapp import util
 manager = Manager(app)
 
 @manager.command
-def sync_moers():
-  util.sync_moers()
+def sync():
+  util.sync()
 
-@manager.command
-def sync_rostock():
-  util.sync_rostock()
 
 if __name__ == "__main__":
   manager.run()

@@ -2,45 +2,23 @@
 var map;
 var markers;
 
-// Icons
-var GreenIcon;
-var greenIcon = null;
-var RedIcon;
-var redIcon = null;
-var PinkIcon;
-var pinkIcon = null;
-var LightgreenIcon;
-var lightgreenIcon = null;
-
 var current_construction_id = null;
 
 $(document).ready(function() {
   if ($('#map').exists()) {
+    $('#region-select').change(function(event) {
+      event.preventDefault();
+      map.setView(new L.LatLng(regions[$('#region-select').val()]['lat'], regions[$('#region-select').val()]['lon']), regions[$('#region-select').val()]['zoom']);
+    });
     var ConstructionIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/img/under_construction_icon.png', iconSize: [40, 35] } });
     constructionIcon = new ConstructionIcon();
-    var RedIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/js/images/marker-icon-red.png' } });
-    redIcon = new RedIcon();
-    var PinkIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/js/images/marker-icon-pink.png' } });
-    pinkIcon = new PinkIcon();
-    var LightgreenIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/js/images/marker-icon-lightgreen.png' } });
-    lightgreenIcon = new LightgreenIcon();
-    
     map = new L.Map('map', {});
-    var backgroundLayer = new L.TileLayer('http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
+    var backgroundLayer = new L.TileLayer('https://otile1-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
       maxZoom: 18,
       minZoom: 4,
       attribution: 'Map Data &copy; <a href="http://www.openstreetmap.org">OpenStreetMap</a> contributors, Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a>.'
     });
-    map.setView(new L.LatLng(51.451117, 6.629194), 13).addLayer(backgroundLayer);
-    /*$.getJSON('/static/js/bochum.json', function(result) {
-      route = L.geoJson(result, {
-        style: {
-          'color': "#000000",
-          'weight': 2,
-          'opacity': 0.65
-        }
-      }).addTo(map);
-    });*/
+    map.setView(new L.LatLng(regions[0]['lat'], regions[0]['lon']), regions[0]['zoom']).addLayer(backgroundLayer);
     if ($('#flashes').exists())
       close_sidebar();
     get_construction_sites();

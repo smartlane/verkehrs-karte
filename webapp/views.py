@@ -39,6 +39,23 @@ import socket
 def index():
   return render_template('index.html')
 
+@app.route("/region-list")
+def region_list():
+  start_time = time.time()
+  ret = {
+    'status': 0,
+    'duration': round((time.time() - start_time) * 1000),
+    'request': {},
+    'response': app.config['REGIONS']
+  }
+  json_output = json.dumps(ret, cls=util.MyEncoder, sort_keys=True)
+  response = make_response(json_output, 200)
+  response.mimetype = 'application/json'
+  response.headers['Pragma'] = 'no-cache'
+  response.headers['Expires'] = -1
+  response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+  return(response)
+
 @app.route("/construction-list")
 def construction_list():
   start_time = time.time()

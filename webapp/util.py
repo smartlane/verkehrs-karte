@@ -38,6 +38,7 @@ from models import *
 from webapp import app, db
 from lxml import etree, html
 from lxml.cssselect import CSSSelector
+import sources
 
 def rfc1123date(value):
   """
@@ -57,73 +58,12 @@ def cache_max_age(hours):
   seconds = hours * 60 * 60
   return 'max-age=' + str(seconds)
 
-def sync_moers():
-  request_data = requests.get(app.config['SOURCE'][0]['site'])
-  doc = html.fromstring(request_data.content)
-  table_trs_select = CSSSelector("#c6559 tr")
-  table_trs = table_trs_select(doc)
-  data = {}
-  for table_tr in table_trs:
-    if len(table_tr[1]) and table_tr[0][0].text:
-      new_construction = ConstructionSite()
-      new_construction.position_descr = table_tr[0][0].text
-      new_construction.descr = table_tr[2][0].text
-      new_construction.constructor = table_tr[3][0].text
-      new_construction.created_at = datetime.datetime.now()
-      new_construction.updated_at = datetime.datetime.now()
-      new_construction.source = 1
-      db.session.add(new_construction)
-      db.session.commit()
-  """
-    print table_tr
-    if Tree.query.filter_by(external_id=dataset['attributes']['OBJECTID']).count() == 0:
-      print "Add new Dataset with external ID %s" % dataset['attributes']['OBJECTID']
-      new_tree = Tree()
-      new_tree.external_id = dataset['attributes']['OBJECTID']
-      lat_lng = utm.to_latlon(dataset['geometry']['x'], dataset['geometry']['y'], 32, 'U')
-      new_tree.lat = lat_lng[0]
-      new_tree.lng = lat_lng[1]
-      if len(dataset['attributes']['ADRESSE'].strip()):
-        new_tree.address = dataset['attributes']['ADRESSE']
-      if len(dataset['attributes'][u'GEH\xf6lZFL\xe4c'].strip()):
-        new_tree.tree_type_old = dataset['attributes'][u'GEH\xf6lZFL\xe4c']
-      if len(dataset['attributes'][u'F\xe4lLGRUND'].strip()):
-        new_tree.chop_reason = dataset['attributes'][u'F\xe4lLGRUND']
-      descr = ''
-      if len(dataset['attributes'][u'F\xe4lLUNG'].strip()):
-        descr += u'Zeitpunkt der Fällung: ' + dataset['attributes'][u'F\xe4lLUNG'].strip()
-      new_tree.descr = descr
-      new_tree.created_at = datetime.datetime.now()
-      new_tree.updated_at = datetime.datetime.now()
-      new_tree.author = 'Stadt Bochum'
-      new_tree.email = 'info@bochum.de'
-      new_tree.city = 'Bochum'
-      new_tree.public = 1
-      new_tree.postalcode = ''
-      new_tree.type = 4
-      new_tree.source = 'Stadt Bochum'
-      db.session.add(new_tree)
-      db.session.commit()
-  """
-def sync_rostock():
-    response = urllib.urlopen("https://geo.sv.rostock.de/download/opendata/baustellen/baustellen.json")
-    data = json.loads(response.read())
-    for construction in data["features"]:
-        new_construction = ConstructionSite()
-        new_construction.position_descr = construction["properties"]["strasse_name"]
-        new_construction.descr = construction["properties"]["sperrung_art"] + " - " + construction["properties"]["sperrung_grund"]
-        new_construction.constructor = construction["properties"]["gemeinde_name"]
-        new_construction.execution = construction["properties"]["durchfuehrung"]
-        new_construction.source = 2
-        new_construction.lat = construction["geometry"]["coordinates"][1]
-        new_construction.lng = construction["geometry"]["coordinates"][0]
-        new_construction.begin = construction["properties"]["sperrung_anfang"]
-        new_construction.end = construction["properties"]["sperrung_ende"]
-        new_construction.created_at = datetime.datetime.now()
-        new_construction.updated_at = datetime.datetime.now()
-        db.session.add(new_construction)
-        db.session.commit()
-
+def sync():
+  for source_id, source_name in app.config['SOURCES'].iteritems():
+    source_class = getattr(sources, source_name)
+    source_object = source_class()
+    print "Syncing %s (ID %s)" % (source_name, source_id)
+    source_object.sync()
 
 def geocode(location_string):
   """
@@ -170,6 +110,8 @@ def distance_earth(lat1, long1, lat2, long2):
 def obscuremail(mailaddress):
   return mailaddress.replace('@', '__AT__').replace('.', '__DOT__')
 app.jinja_env.filters['obscuremail'] = obscuremail
+
+app.jinja_env.globals.update(dumps=json.dumps)
 
 def deref_type(type_id):
   type_id = int(type_id)

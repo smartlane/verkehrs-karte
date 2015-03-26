@@ -8,6 +8,7 @@ from flask.ext.bootstrap import Bootstrap
 from flask.ext.basicauth import BasicAuth
 from werkzeug.contrib.cache import MemcachedCache
 
+
 app = Flask(__name__)
 app.debug = True
 app.config.from_pyfile('../config.py')
@@ -28,4 +29,12 @@ db = SQLAlchemy(app)
 from models import *
 #from forms import *
 
+import sources
+app.config['REGION_DATA'] = {}
+for region_id, region_data in app.config['REGIONS'].iteritems():
+  if 'parent' in region_data:
+    app.config['REGION_DATA'][region_data['parent']]['children'][region_id] = region_data
+  else:
+    app.config['REGION_DATA'][region_id] = region_data
+    app.config['REGION_DATA'][region_id]['children'] = {}
 import webapp.views

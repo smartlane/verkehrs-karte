@@ -18,41 +18,135 @@ BASIC_AUTH_USERNAME = 'admin-username'
 BASIC_AUTH_PASSWORD = 'admin-password'
 BASIC_AUTH_REALM = 'Bitte geben Sie Nutzername und Passwort fuer das Admin-Interface ein.'
 
-CITY = [
-  {
-    'id': 1,
-    'title': 'Moers',
-    'lat': 51.451117,
-    'lon': 6.629194
-  },
-  {
-    'id': 2,
-    'title': 'Bochum',
-    'lat': 51.451117,
-    'lon': 6.629194
-  },
-  {
-    'id': 3,
-    'title': 'Aachen',
-    'lat': 51.451117,
-    'lon': 6.629194
-  }
-]
 
-SOURCE = [
-  {
-    'title': 'ENNI',
-    'website': 'https://www.enni.de/enni-gruppe/hier-bauen-wir.html',
-    'city_id': 1
+REGIONS = {
+  0: {
+    'name': u'Deutschland',
+    'lat': '51.163375',
+    'lon': '10.447683',
+    'zoom': 6
   },
-  {
-    'title': 'Bochum',
-    'website': '',
-    'city_id': 1
+  1: {
+    'name': u'Baden-Württemberg',
+    'lat': '48.695833',
+    'lon': '9.0025',
+    'zoom': 7
   },
-  {
-    'title': 'Aachen',
-    'website': 'http://www.bsis.regioit.de/geoserver/BSISPROD/wms?service=wfs&version=2.0.0&request=GetFeature&typeNames=BSISPROD:Baustellen_7Tage_Punkte&outputFormat=json',
-    'city_id': 1
+  2: {
+    'name': 'Bayern',
+    'lat': '48.946389',
+    'lon': '11.404167',
+    'zoom': 7
+  },
+  3: {
+    'name': 'Berlin',
+    'lat': '52.502778',
+    'lon': '13.404167',
+    'zoom': 10
+  },
+  4: {
+    'name': 'Brandenburg',
+    'lat': '52.4592577',
+    'lon': '13.0165528',
+    'zoom': 8
+  },
+  5: {
+    'name': 'Bremen',
+    'lat': '53.3425297',
+    'lon': '8.5905613',
+    'zoom': 10
+  },
+  6: {
+    'name': 'Hamburg ',
+    'lat': '53.568889',
+    'lon': '10.028889',
+    'zoom': 10
+  },
+  7: {
+    'name': 'Hessen',
+    'lat': '50.608047',
+    'lon': '9.0284650',
+    'zoom': 8
+  },
+  8: {
+    'name': 'Mecklenburg-Vorpommern',
+    'lat': '53.773439',
+    'lon': '12.575558',
+    'zoom': 8
+  },
+  9: {
+    'name': 'Niedersachsen',
+    'lat': '52.839831',
+    'lon': '9.075918',
+    'zoom': 8
+  },
+  10: {
+    'name': 'Nordrhein-Westfalen',
+    'lat': '51.476631',
+    'lon': '7.555005',
+    'zoom': 8
+  },
+  11: {
+    'name': 'Rheinland-Pfalz',
+    'lat': '49.955139',
+    'lon': '7.310417',
+    'zoom': 8
+  },
+  12: {
+    'name': 'Saarland',
+    'lat': '49.37715',
+    'lon': '6.878378',
+    'zoom': 10
+  },
+  13: {
+    'name': 'Sachsen',
+    'lat': '51.0529280',
+    'lon': '13.345149',
+    'zoom': 8
+  },
+  14: {
+    'name': 'Sachsen-Anhalt',
+    'lat': '51.924506',
+    'lon': '11.83587',
+    'zoom': 8
+  },
+  15: {
+    'name': 'Schleswig-Holstein',
+    'lat': '54.184640',
+    'lon': '9.82169',
+    'zoom': 8
+  },
+  16: {
+    'name': u'Thüringen',
+    'lat': '50.907439',
+    'lon': '11.037875',
+    'zoom': 8
+  },
+  17: {
+    'name': 'Moers',
+    'lat': '51.4573083',
+    'lon': '6.6185085',
+    'zoom': 11,
+    'parent': 10
+  },
+  18: {
+    'name': 'Rostock',
+    'lat': '54.147551',
+    'lon': '12.1469532',
+    'zoom': 11,
+    'parent': 8
+  },
+  19: {
+    'name': 'Aachen',
+    'lat': '50.75968',
+    'lon': '6.0965247',
+    'zoom': 11,
+    'parent': 10
   }
-]
+}
+
+SOURCES = {
+  1: 'MoersEnni',
+  2: 'RostockStadt',
+  3: 'AachenStadt'
+}
