@@ -6,6 +6,7 @@ Flask-SQLAlchemy
 Flask-MySQL
 Flask-BasicAuth
 Flask-Security
+Flask-Script
 utm
 python-memcached
 requests

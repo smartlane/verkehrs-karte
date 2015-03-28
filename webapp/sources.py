@@ -21,7 +21,7 @@ class DefaultSource():
     else:
       return False
     # transform gk -> wgs84 degree
-    cmd = "echo %s %s | cs2cs +proj=tmerc +lat_0=0 +lon_0=%s  +k=1.000000 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs +nadgrids=/srv/www/baustellen-karte/webapp/static/BETA2007.gsb +to +init=epsg:4326" % (x, y, gk_id) ## ungenau
+    cmd = "echo %s %s | cs2cs +proj=tmerc +lat_0=0 +lon_0=%s  +k=1.000000 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs +nadgrids=/srv/www/de.mobil-bei-uns/webapp/static/BETA2007.gsb +to +init=epsg:4326" % (x, y, gk_id) ## ungenau
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = result.communicate()[0]
     
