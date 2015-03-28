@@ -65,6 +65,10 @@ def sync():
     print "Syncing %s (ID %s)" % (source_name, source_id)
     source_object.sync()
 
+def test():
+  foo = sources.KoelnStadt()
+  foo.sync()
+
 def geocode(location_string):
   """
   Löst eine Straßen- oder Lat,Lon-Angabe zu einer Geo-Postion auf.

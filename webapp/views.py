@@ -59,13 +59,13 @@ def region_list():
 @app.route("/construction-list")
 def construction_list():
   start_time = time.time()
-  constructions = ConstructionSite.query.all()
+  constructions = ConstructionSite.query.filter(ConstructionSite.end > datetime.datetime.now()).all()
   result = []
   for construction in constructions:
     result.append({
       'id': construction.id,
       'lat': construction.lat,
-      'lng': construction.lng
+      'lng': construction.lon
     })
   ret = {
     'status': 0,

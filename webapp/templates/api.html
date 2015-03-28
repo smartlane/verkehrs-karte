@@ -3,42 +3,29 @@
 {% block content %}
 <div id="content-tree-api" class="content-text">
   <h1>API &amp; Open Source</h1>
-  <p>Das Projekt hier-fehlt-ein-baum.de ist OpenSource Software. Es basiert auf dem Python-Web-Framework Flask und benötigt eine MySQL Datenbank. Die Quelldaten <a href="https://github.com/the-infinity/hier-fehlt-ein-baum/">liegen auf Github</a>, Patches sind willkommen.</p>
-  <p>Die Daten von hier-fehlt-ein-baum.de sind über eine offene Schnittstelle (API) abrufbar. Alle von den Nutzern generierten Informationen sind gemeinfrei, die von der Stadt importierten Daten müssten auch gemeinfrei sein, wir können dazu aber keine 100% sichere Aussage treffen, da dies Bestandteil aktieller Gerichtsverfahren ist. Die Rechtslage sieht allerdings gut für die Weiterverwendung aus, <a href="https://netzpolitik.org/2014/zensurheberrecht-fragdenstaat-verklagt-die-bundesrepublik-und-gewinnt-ohne-es-zu-wissen/">wenn man sich aktuelle Entwicklungen anschaut.</a></p>
-  <p>Die Liste aller Bäume erhält man unter /tree-list, welches ein JSON zurückgibt:</p>
+  <p>Das Projekt mobil-bei-uns.de ist OpenSource Software. Es basiert auf dem Python-Web-Framework Flask und benötigt eine MySQL Datenbank. Die Quelldaten <a href="https://github.com/OpenRuhr/verkehrs-karte/">liegen auf Github</a>, Patches sind willkommen.</p>
+  <p>Die Daten von mobil-bei-uns.de sind über eine offene Schnittstelle (API) abrufbar. Die Lizenz jedes einzelnen Datensatzes steht in den licence-Feldern.</p>
+  <p>Die Liste aller Verkehrsbehinderungen erhält man unter /construction-list, welches ein JSON zurückgibt:</p>
   <p><pre>
 [
   {
-    'id': ID des Baums, Integer
-    'type': Status des Baums, Integer 0-4
+    'id': ID der Verkehrsbehinderung, Integer
     'lat': Geographische Breite, Float
     'lon': Geographische Länge, Float
   },
   ...
 ]
   </pre></p>
-  <p>Mit der ID kann man dann weitere Informationen zu den einzelnen Bäume abfragen. Unter /tree-details?id=BAUM_ID erhält man folgendes JSON</p>
+  <p>Mit der ID kann man dann weitere Informationen zu den einzelnen Verkehrsbehinderungen abfragen. Unter /construction-details?id=CONSTRUCTION_ID erhält man folgendes JSON</p>
   <p><pre>
 {
-  'id': ID des Baums, Integer
-  'address': Straße und Hausnummer, String(255)
-  'postalcode': Postleitzahl, String(5)
-  'city': Stadt, String(255)
+  'id': ID der Verkehrsbehinderung, Integer
   'descr': Beschreibung, String(35000)
-  'picture': Bild unter /static/img/tree/BAUM_ID.jpg bzw /static/img/tree/BAUM_ID_small.jpg vorhanden, Integer 0-1
   'lat': Geographische Breite, Float
-  'lng': Geographische Breite, Länge
-  'chop_reason': Begründung des Abholzens seitens Verwaltung, String(255)
-  'type': Status des Baums, Integer 0-4
+  'lng': Geographische Länge, Float
 }
   </pre></p>
-  <h2>Datenquelle Stadt Bochum</h2>
-  <p>Die Stadt Bochum verwendet wie andere Kommunen auch <a href="http://gis.bochum.de/ASWeb/ASC_URL/GISConnectorRIA.do?VERSION=1.0&PROJECT=InternetPortal&APPLID=0&USER=baum&PWD=baum">die Software ArcGIS</a>. Diese liefert nicht nur Kartenmaterial, sondern auch Rohdaten im JSON Format aus. Das URL Layout sieht wie folgt aus:</p>
-  <pre>
-GIS_URL_COOKIE = 'http://gis.bochum.de/ASWeb/ASC_URL/GISConnectorRIA.do?VERSION=1.0&PROJECT=InternetPortal&APPLID=0&USER=baum&PWD=baum'
-GIS_URL_DATA = 'https://gis.bochum.de/ASWeb/ASC_RIA/gpproxy.jsp?http://vb2k8gis02:8399/arcgis/rest/services/Baumfaellkataster/MapServer/0/query?where=OBJECTID+IS+NOT+NULL&returnGeometry=true&outFields=*&f=json'
-  </pre>
-  <p>Man benötigt das Cookie von GIS_URL_COOKIE um die Daten unter GIS_URL_DATA abrufen zu können.</p>
-  <p>Die dort befindlichen Koordinaten sind keine üblichen geographischen Längen / Breiten, sondern im <a href="http://de.wikipedia.org/wiki/World_Geodetic_System_1984">World Geodetic System 1984</a>. Umwandeln lassen sich Diese u.a. <a href="https://pypi.python.org/pypi/utm">mit dem Python-Modul utm</a>.</p>
+  <h2>Datenquellen</h2>
+  <p>Auf mobil-bei-uns.de werden etliche verschiedene Datenquellen genutzt. Wie diese abgerufen werden, findet sich in der <a href="https://github.com/OpenRuhr/verkehrs-karte/blob/master/webapp/sources.py">Datei sources.py</a>.</p>
 </div>
 {% endblock %}

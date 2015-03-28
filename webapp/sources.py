@@ -1,93 +1,216 @@
 # encoding: utf-8
 from models import *
 from webapp import app, db
-from lxml import etree, html
-from lxml.cssselect import CSSSelector
+import subprocess
+import dateutil.parser
+import requests
+import json
+import datetime
 
-class MoersEnni():
-  id = 1
-  region_id = 17
-  title = 'Stadt Moers'
-  url = 'https://www.enni.de/enni-gruppe/hier-bauen-wir.html'
-  source_url = 'https://www.enni.de/enni-gruppe/hier-bauen-wir.html'
-  contact_company = 'ENNI'
-  contact_name = 'Claus Arndt'
-  contact_mail = 'stadt@moers.de'
+# apt-get install geographiclib-tools proj-bin
+# download http://geographiclib.sourceforge.net/1.28/geoid.html
+
+class FeatureCollection():
+  contact_company = 'Baustelleninformationssystem des Bundes und der Länder'
+
+class DefaultSource():
+  # transforms from gauss kruger to wgs84 decimal
+  def gk2latlon(self, x, y, gk_zone):
+    if gk_zone > 1 and gk_zone < 6:
+      gk_id = gk_zone * 3
+    else:
+      return False
+    # transform gk -> wgs84 degree
+    cmd = "echo %s %s | cs2cs +proj=tmerc +lat_0=0 +lon_0=%s  +k=1.000000 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs +nadgrids=/srv/www/baustellen-karte/webapp/static/BETA2007.gsb +to +init=epsg:4326" % (x, y, gk_id) ## ungenau
+    result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = result.communicate()[0]
+    
+    # replace ' and "
+    result = result.replace("'", "\\'")
+    result = result.replace("\"", "\\\"")
+    result = result.split()
+    x = result[0]
+    y = result[1]
+    
+    # transform wgs84 degree -> wgs84 decimal
+    cmd = "echo %s %s | GeoConvert -p 3" % (x, y)
+    result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = result.communicate()[0]
+    
+    result = result.split()
+    return {'lat': result[0], 'lon': result[1]}
   
-  def sync():
-    request_data = requests.get(app.config['SOURCE'][0]['site'])
-    doc = html.fromstring(request_data.content)
-    table_trs_select = CSSSelector("#c6559 tr")
-    table_trs = table_trs_select(doc)
-    data = {}
-    for table_tr in table_trs:
-      if len(table_tr[1]) and table_tr[0][0].text:
-        new_construction = ConstructionSite()
-        new_construction.position_descr = table_tr[0][0].text
-        new_construction.descr = table_tr[2][0].text
-        new_construction.constructor = table_tr[3][0].text
-        new_construction.created_at = datetime.datetime.now()
-        new_construction.updated_at = datetime.datetime.now()
-        new_construction.source = 1
-        db.session.add(new_construction)
-        db.session.commit()
+  def save_mapping(self, source_data, current_construction, mapping):
+    for mapping_from, mapping_to in mapping.iteritems():
+      if mapping_from in source_data:
+        if source_data[mapping_from]:
+          setattr(current_construction, mapping_to, source_data[mapping_from])
+    return current_construction
+  
+##############
+### Aachen ###
+##############
 
-class RostockStadt():
+class AachenStadt(DefaultSource):
+  id = 1
+  title = ''
+  url = 'http://offenedaten.aachen.de/dataset/baustellen-stadtgebiet-aachen'
+  source_url = 'http://www.bsis.regioit.de/geoserver/BSISPROD/wms?service=wfs&version=2.0.0&request=GetFeature&typeNames=BSISPROD:Baustellen_7Tage_Punkte&outputFormat=json'
+  contact_company = 'Geoservice der Stadt Aachen'
+  contact_name = ''
+  contact_mail = 'offenedaten@mail.aachen.de'
+  licence_name = 'Datenlizenz Deutschland – Namensnennung – Version 2.0'
+  licence_url = 'https://www.govdata.de/dl-de/by-2-0'
+  mapping = {
+    'NAME': 'title',
+    'EINSCHRAEN': 'restriction',
+    'HOTLINK': 'external_url',
+    'FIRMA': 'execution',
+    'BAUHERR': 'constructor',
+    'SYMBOL': 'descr'
+  }
+  
+  def sync(self):
+    request_data = requests.get(self.source_url)
+    data = json.loads(request_data.content)
+    for construction in data['features']:
+      current_external_id = construction['properties']['GID']
+      current_construction = ConstructionSite.query.filter_by(external_id=current_external_id).filter_by(source_id=self.id).first()
+      # no database entry
+      if not current_construction:
+        current_construction = ConstructionSite()
+        current_construction.external_id = current_external_id
+        current_construction.created_at = datetime.datetime.now()
+        current_construction.source_id = self.id
+      # refresh values
+      current_constuction = self.save_mapping(construction['properties'], current_construction, self.mapping)
+      current_constuction.location_descr = "%s %s" % (construction['properties']['STRASSEN'], construction['properties']['STRASSEN'])
+      period = construction['properties']['ZEITRAUM'].split(' - ')
+      current_constuction.begin = datetime.datetime(int(period[0][6:10]), int(period[0][3:5]), int(period[0][0:2]), 0, 0, 0)
+      current_constuction.end = datetime.datetime(int(period[1][6:10]), int(period[1][3:5]), int(period[1][0:2]), 23, 59, 59)
+      current_construction.updated_at = datetime.datetime.now()
+      position = self.gk2latlon(construction['geometry']['coordinates'][1], construction['geometry']['coordinates'][0], 2)
+      current_construction.lat = position['lat']
+      current_construction.lon = position['lon']
+      current_construction.licence_name = self.licence_name
+      current_construction.licence_url = self.licence_url
+      current_construction.licence_owner = self.contact_company
+      # save data
+      db.session.add(current_construction)
+      db.session.commit()
+
+###############
+### Rostock ###
+###############
+
+class RostockStadt(DefaultSource):
   id = 2
-  region_id = 18
   title = 'Stadt Rostock'
   url = 'https://geo.sv.rostock.de/'
   source_url = 'https://geo.sv.rostock.de/download/opendata/baustellen/baustellen.json'
   contact_company = 'Rostock'
-  contact_name = 'Stadt Rostock'
-  contact_mail = 'stadt@rostock.de'
+  contact_name = 'Geodienste der Stadt Rostock'
+  contact_mail = 'geodienste@rostock.de'
+  licence_name = 'unbekannt'
+  licence_url = ''
   active = True
+  mapping = {
+    'art': 'title',
+    'sperrung_art': 'restriction',
+    'url': 'external_url',
+    'sperrung_grund': 'descr',
+    'sperrung_grund': 'reason',
+    'durchfuehrung': 'execution'
+  }
 
-  def sync():
-    response = urllib.urlopen(self.source_url)
-    data = json.loads(response.read())
-    for construction in data["features"]:
-      new_construction = ConstructionSite()
-      new_construction.position_descr = construction["properties"]["strasse_name"]
-      new_construction.descr = construction["properties"]["sperrung_art"] + " - " + construction["properties"]["sperrung_grund"]
-      new_construction.constructor = construction["properties"]["gemeinde_name"]
-      new_construction.execution = construction["properties"]["durchfuehrung"]
-      new_construction.source = 2
-      new_construction.lat = construction["geometry"]["coordinates"][1]
-      new_construction.lng = construction["geometry"]["coordinates"][0]
-      new_construction.begin = construction["properties"]["sperrung_anfang"]
-      new_construction.end = construction["properties"]["sperrung_ende"]
-      new_construction.created_at = datetime.datetime.now()
-      new_construction.updated_at = datetime.datetime.now()
-      db.session.add(new_construction)
+  def sync(self):
+    request_data = requests.get(self.source_url)
+    data = json.loads(request_data.content)
+    for construction in data['features']:
+      current_external_id = construction['properties']['uuid']
+      current_construction = ConstructionSite.query.filter_by(external_id=current_external_id).filter_by(source_id=self.id).first()
+      # no database entry
+      if not current_construction:
+        current_construction = ConstructionSite()
+        current_construction.external_id = current_external_id
+        current_construction.created_at = datetime.datetime.now()
+        current_construction.source_id = self.id
+      # refresh values
+      current_constuction = self.save_mapping(construction['properties'], current_construction, self.mapping)
+      current_constuction.type = current_constuction.title
+      if construction['properties']['strasse_name'] and construction['properties']['lage_von'] and construction['properties']['lage_bis']:
+        current_constuction.location_descr = "%s von %s bis %s" % (construction['properties']['strasse_name'], construction['properties']['lage_von'], construction['properties']['lage_bis'])
+      elif construction['properties']['strasse_name']:
+        current_constuction.location_descr = construction['properties']['strasse_name']
+      current_construction.begin = dateutil.parser.parse(construction['properties']['sperrung_anfang']).replace(tzinfo=None)
+      current_construction.end = dateutil.parser.parse(construction['properties']['sperrung_ende']).replace(tzinfo=None)
+      current_construction.licence_name = self.licence_name
+      #current_construction.licence_url = self.licence_url
+      current_construction.licence_owner = self.contact_company
+      current_construction.lat = construction['geometry']['coordinates'][1]
+      current_construction.lon = construction['geometry']['coordinates'][0]
+      current_construction.updated_at = datetime.datetime.now()
+      # save data
+      db.session.add(current_construction)
       db.session.commit()
 
-class AachenStadt():
-  id = 3
-  region_id = 19
-  title = 'Stadt Aachen'
-  url = 'http://offenedaten.aachen.de/dataset/baustellen-stadtgebiet-aachen'
-  source_url = 'http://www.bsis.regioit.de/geoserver/BSISPROD/wms?service=wfs&version=2.0.0&request=GetFeature&typeNames=BSISPROD:Baustellen_7Tage_Punkte&outputFormat=json'
-  contact_company = 'Aachen'
-  contact_name = 'Stadt Aachen'
-  contact_mail = 'stadt@aachen.de'
-  active = True
+############
+### Köln ###
+############
 
-  def sync():
-    response = urllib.urlopen(self.source_url)
-    data = json.loads(response.read())
-    for construction in data["features"]:
-      new_construction = ConstructionSite()
-      new_construction.position_descr = construction["properties"]["strasse_name"]
-      new_construction.descr = construction["properties"]["sperrung_art"] + " - " + construction["properties"]["sperrung_grund"]
-      new_construction.constructor = construction["properties"]["gemeinde_name"]
-      new_construction.execution = construction["properties"]["durchfuehrung"]
-      new_construction.source = 2
-      new_construction.lat = construction["geometry"]["coordinates"][1]
-      new_construction.lng = construction["geometry"]["coordinates"][0]
-      new_construction.begin = construction["properties"]["sperrung_anfang"]
-      new_construction.end = construction["properties"]["sperrung_ende"]
-      new_construction.created_at = datetime.datetime.now()
-      new_construction.updated_at = datetime.datetime.now()
-      db.session.add(new_construction)
+class KoelnStadt(DefaultSource):
+  id = 3
+  title = u'Stadt Köln'
+  url = 'http://offenedaten-koeln.de/dataset/baustellen-k%C3%B6ln'
+  source_url = 'http://geoportal1.stadt-koeln.de/ArcGIS/rest/services/WebVerkehr_DataOSM/MapServer/0/query?text=&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds=&where=objectid%20is%20not%20null&time=&returnCountOnly=false&returnIdsOnly=false&returnGeometry=true&maxAllowableOffset=&outSR=4326&outFields=%2A&f=json'
+  source_metadata_url = 'http://geoportal1.stadt-koeln.de/ArcGIS/rest/services/WebVerkehr_DataOSM/MapServer/0?f=json&pretty=true'
+  contact_company = 'Stadt Köln'
+  contact_name = u'Stadt Köln'
+  contact_mail = 'e-government@stadt-koeln.de'
+  licence_name = 'Creative Commons Namensnennung 3.0'
+  licence_url = 'http://creativecommons.org/licenses/by/3.0/de/'
+  active = True
+  mapping = {
+    'NAME': 'title',
+    'BESCHREIBUNG': 'descr'
+  }
+
+  def sync(self):
+    # first: get metadata
+    meta_types = {}
+    request_data = requests.get(self.source_metadata_url)
+    data = json.loads(request_data.content)
+    for field in data['fields']:
+      if field['name'] == 'TYP':
+        for meta_type in field['domain']['codedValues']:
+          meta_types[meta_type['code']] = meta_type['name']
+    
+    # second: get construction sites
+    request_data = requests.get(self.source_url)
+    data = json.loads(request_data.content)
+    for construction in data['features']:
+      current_external_id = construction['attributes']['OBJECTID']
+      current_construction = ConstructionSite.query.filter_by(external_id=current_external_id).filter_by(source_id=self.id).first()
+      # no database entry
+      if not current_construction:
+        current_construction = ConstructionSite()
+        current_construction.external_id = current_external_id
+        current_construction.created_at = datetime.datetime.now()
+        current_construction.source_id = self.id
+      # refresh values
+      current_constuction = self.save_mapping(construction['attributes'], current_construction, self.mapping)
+      if construction['attributes']['DATUM_VON']:
+        current_construction.begin = datetime.datetime.fromtimestamp(construction['attributes']['DATUM_VON'] / 1000)
+      if construction['attributes']['DATUM_BIS']:
+        current_construction.end = datetime.datetime.fromtimestamp(construction['attributes']['DATUM_BIS'] / 1000)
+      current_construction.external_url = 'http://www.stadt-koeln.de%s' % (construction['attributes']['LINK'])
+      current_construction.type = meta_types[construction['attributes']['TYP']]
+      current_construction.licence_name = self.licence_name
+      current_construction.licence_url = self.licence_url
+      current_construction.licence_owner = self.contact_company
+      current_construction.lat = construction['geometry']['y']
+      current_construction.lon = construction['geometry']['x']
+      current_construction.updated_at = datetime.datetime.now()
+      # save data
+      db.session.add(current_construction)
       db.session.commit()

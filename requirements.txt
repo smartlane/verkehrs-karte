@@ -13,3 +13,4 @@ bson
 sqlalchemy-migrate
 lxml
 cssselect
+python-dateutil
