@@ -146,7 +146,8 @@ REGIONS = {
 }
 
 SOURCES = {
-  1: 'MoersEnni',
+  1: 'AachenStadt',
   2: 'RostockStadt',
-  3: 'AachenStadt'
+  3: 'KoelnStadt',
+  4: 'BonnStadt'
 }

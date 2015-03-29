@@ -66,7 +66,7 @@ def sync():
     source_object.sync()
 
 def test():
-  foo = sources.KoelnStadt()
+  foo = sources.BonnStadt()
   foo.sync()
 
 def geocode(location_string):

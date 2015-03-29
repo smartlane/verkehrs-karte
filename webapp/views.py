@@ -92,18 +92,25 @@ def construction_details():
   result = {
     'id': construction.id,
     'title': construction.title,
-    'city': construction.city,
     'descr': construction.descr,
-    'position_descr': construction.position_descr,
+    'location_descr': construction.location_descr,
     'constructor': construction.constructor,
     'reason': construction.reason,
     'execution': construction.execution,
     'lat': construction.lat,
-    'lng': construction.lng,
-    'source': construction.source,
+    'lon': construction.lon,
     'area': construction.area,
     'begin': construction.begin,
-    'end': construction.end
+    'end': construction.end,
+    'type': construction.type,
+    'restriction': construction.restriction,
+    'external_id': construction.external_id,
+    'external_url': construction.external_url,
+    'created_at': construction.created_at,
+    'updated_at': construction.updated_at,
+    'licence_name': construction.licence_name,
+    'licence_url': construction.licence_url,
+    'licence_owner': construction.licence_owner
   }
   ret = {
     'status': 0,

@@ -47,17 +47,45 @@ function get_construction_sites() {
           var html = '<span id="close-sidebar" onclick="close_sidebar();">schließen</span>';
           html += '<h2>Details</h2>';
           
-          if (construction['begin'])
-            html += '<h3>Start</h3><p>' + construction['begin'] + '</p>';
-          html += '<h3>Ende</h3><p>' + construction['end'] + '</p>';
-          
-          if (construction['descr'])
-            html += '<h3>Beschreibung</h3><p>' + construction['descr'] + '</p>';
-          html += '<h3>Ort</h3><p>' + construction['position_descr'] + '</p>';
-          html += '<h3>Bauherr</h3><p>' + construction['constructor'] + '</p>';
+          if (construction['begin']) {
+            html += '<h3>Start</h3><p>' + construction['begin'].substr(8, 2) + '.' + construction['begin'].substr(5, 2) + '.' + construction['begin'].substr(0, 4);
+            if (construction['begin'].substr(11, 2) != '00')
+              html += ', ' + construction['begin'].substr(11, 2) + ':' + construction['begin'].substr(14, 2);
+            html += '</p>';
+          }
+          if (construction['begin']) {
+            html += '<h3>Ende</h3><p>' + construction['end'].substr(8, 2) + '.' + construction['end'].substr(5, 2) + '.' + construction['end'].substr(0, 4);
+            if (!((construction['end'].substr(11, 2) == '23' && construction['end'].substr(14, 2) == '59') || (construction['end'].substr(11, 2) == '00' && construction['end'].substr(14, 2) == '00')))
+              html += ', ' + construction['end'].substr(11, 2) + ':' + construction['end'].substr(14, 2);
+            html += '</p>';
+          }
+          if (construction['descr'] || construction['external_url']) {
+            if (construction['descr'])
+              html += '<h3>Beschreibung</h3><p>' + construction['descr'] + '</p>';
+            if (construction['descr'] && construction['external_url'])
+              html += ', ';
+            if (construction['external_url'])
+              html += '<a href=\"' + construction['external_url'] + '\">Weitere Informationen</a>';
+          }
+          if (construction['location_descr'])
+            html += '<h3>Ort</h3><p>' + construction['location_descr'] + '</p>';
+          if (construction['constructor'])
+            html += '<h3>Bauherr</h3><p>' + construction['constructor'] + '</p>';
           if (construction['execution'])
             html += '<h3>Bauunternehmen</h3><p>' + construction['execution'] + '</p>';
-          
+          if (construction['restriction'])
+            html += '<h3>Einschränkungen</h3><p>' + construction['restriction'] + '</p>';
+          if (construction['licence_name']) {
+            html += '<h3>Lizenz</h3><p>';
+            if (construction['licence_url'])
+              html += '<a href=\"' + construction['licence_url'] + '\">';
+            html += construction['licence_name'];
+            if (construction['licence_url'])
+              html += '</a>';
+            if (construction['licence_owner'])
+              html += ', Datenquelle: ' + construction['licence_owner'];
+            html += '</p>';
+          }
           $('#details').html(html);
         });
       });
