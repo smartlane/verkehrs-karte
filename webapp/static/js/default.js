@@ -48,7 +48,7 @@ function get_construction_sites() {
           html += '<h2>Details</h2>';
           if (construction['begin'] || construction['end']) {
             html += '<h3>Zeitraum</h3><p>';
-            if (construction['end']) {
+            if (construction['begin']) {
               html += '' + construction['begin'].substr(8, 2) + '.' + construction['begin'].substr(5, 2) + '.' + construction['begin'].substr(0, 4);
               if (construction['begin'].substr(11, 2) != '00')
                 html += ', ' + construction['begin'].substr(11, 2) + ':' + construction['begin'].substr(14, 2);
