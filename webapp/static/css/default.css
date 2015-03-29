@@ -61,9 +61,25 @@ h2 {
   position: absolute;
   top: 39px;
   right: 0;
-  bottom: 0;
+  bottom: 24px;
   width: 290px;
   background-color: rgba(0,0,0,0.8);
+}
+
+#footer {
+  color: #FFFFFF;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 24px;
+  width: 290px;
+  background-color: rgba(0,0,0,0.8);
+  z-index: 2000;
+  text-align: center;
+}
+
+#footer a {
+  color: #FFFFFF;
 }
 
 #details h3 {
