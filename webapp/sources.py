@@ -6,6 +6,8 @@ import dateutil.parser
 import requests
 import json
 import datetime
+import re
+from xml.etree import ElementTree
 
 # apt-get install geographiclib-tools proj-bin
 # download http://geographiclib.sourceforge.net/1.28/geoid.html
@@ -242,7 +244,7 @@ class KoelnStadt(DefaultSource):
 ############
 
 class BonnStadt(DefaultSource):
-  id = 3
+  id = 4
   title = u'Stadt Bonn'
   url = 'http://offenedaten-koeln.de/dataset/baustellen-k%C3%B6ln'
   source_url = 'http://stadtplan.bonn.de/geojson?Thema=14403&koordsys=25832'
@@ -292,7 +294,7 @@ class BonnStadt(DefaultSource):
 ##############
 
 class ZuerichStadt(DefaultSource):
-  id = 3
+  id = 5
   title = u'Stadt Bonn'
   url = 'https://www.stadt-zuerich.ch/portal/de/index/ogd/daten/tiefbaustelle.html'
   source_url = 'http://data.stadt-zuerich.ch/ogd.4vhCDPd.link'
@@ -346,16 +348,63 @@ class ZuerichStadt(DefaultSource):
 ###############
 
 class HamburgStadt(DefaultSource):
-  id = 3
+  id = 6
   title = u'Stadt Bonn'
   url = 'http://suche.transparenz.hamburg.de/dataset/baustellen-hamburg'
-  source_url = ''
-  contact_company = u'SFreie und Hansestadt Hamburg, Behörde für Wirtschaft Verkehr und Innovation'
+  source_url = 'http://geodienste-hamburg.de/HH_WFS_BWVI_opendata?service=WFS&request=GetFeature&VERSION=1.1.0&typename=verkehr_baustellen_prod'
+  contact_company = u'Freie und Hansestadt Hamburg, Behörde für Wirtschaft Verkehr und Innovation'
   contact_name = u'Stadt Hamburg'
-  contact_mail = 'opendata@zuerich.ch'
+  contact_mail = 'transparenzportal@kb.hamburg.de'
   licence_name = 'Datenlizenz Deutschland Namensnennung 2.0'
   licence_url = 'https://www.govdata.de/dl-de/by-2-0'
   active = True
   mapping = {}
   
+  def sync(self):
+    request_data = requests.get(self.source_url)
+    data = ElementTree.fromstring(request_data.content)
+    for construction in data:
+      current_external_id = construction[0].attrib['{http://www.opengis.net/gml}id']
+      current_construction = ConstructionSite.query.filter_by(external_id=current_external_id).filter_by(source_id=self.id).first()
+      # no database entry
+      if not current_construction:
+        current_construction = ConstructionSite()
+        current_construction.external_id = current_external_id
+        current_construction.created_at = datetime.datetime.now()
+        current_construction.source_id = self.id
+      # refresh values
+      location_descr = []
+      for item in construction[0]:
+        if item.tag == '{http://www.deegree.org/app}strasse':
+          location_descr.append(item.text)
+        elif item.tag == '{http://www.deegree.org/app}abschnitt_von':
+          if item.text:
+            location_descr.append('von ' + item.text)
+        elif item.tag == '{http://www.deegree.org/app}abschnitt_bis':
+          if item.text:
+            location_descr.append('bis ' + item.text)
+        elif item.tag == '{http://www.deegree.org/app}beginn':
+          if item.text:
+            date_begin = re.search(r'(\d{2})\.(\d{2})\.(\d{4})', item.text)
+            if date_begin:
+              current_construction.begin = datetime.datetime(int(date_begin.group(3)), int(date_begin.group(2)), int(date_begin.group(1)), 0, 0, 0)
+        elif item.tag == '{http://www.deegree.org/app}ende':
+          if item.text:
+            date_end = re.search(r'(\d{2})\.(\d{2})\.(\d{4})', item.text)
+            if date_end:
+              current_construction.end = datetime.datetime(int(date_end.group(3)), int(date_end.group(2)), int(date_end.group(1)), 23, 59, 59)
+        elif item.tag == '{http://www.deegree.org/app}art':
+          current_construction.descr = item.text
+        elif item.tag == '{http://www.deegree.org/app}geom':
+          location = self.epsg258322wsg84(item[0][0].text.split()[0], item[0][0].text.split()[1])
+          current_construction.lat = location['lat']
+          current_construction.lon = location['lon']
+      current_construction.location_descr = ' '.join(location_descr)
+      current_construction.licence_name = self.licence_name
+      current_construction.licence_url = self.licence_url
+      current_construction.licence_owner = self.contact_company
+      current_construction.updated_at = datetime.datetime.now()
+      # save data
+      db.session.add(current_construction)
+      db.session.commit()
   
