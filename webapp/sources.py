@@ -304,7 +304,7 @@ class ZuerichStadt(DefaultSource):
   active = True
   mapping = {
     'Name': 'title',
-    'Projektbeschrieb': 'desrc',
+    'Projektbeschrieb': 'descr',
     'Baubereich': 'location_descr'
   }
   
