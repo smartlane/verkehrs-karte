@@ -302,13 +302,50 @@ class ZuerichStadt(DefaultSource):
   licence_name = 'unbekannt'
   licence_url = ''
   active = True
-  mapping = {}
+  mapping = {
+    'Name': 'title',
+    'Projektbeschrieb': 'desrc',
+    'Baubereich': 'location_descr'
+  }
+  
+  def sync(self):
+    request_data = requests.get(self.source_url)
+    data = json.loads(request_data.content)
+    for construction in data['features']:
+      current_external_id = construction['properties']['Baunummer']
+      current_construction = ConstructionSite.query.filter_by(external_id=current_external_id).filter_by(source_id=self.id).first()
+      # no database entry
+      if not current_construction:
+        current_construction = ConstructionSite()
+        current_construction.external_id = current_external_id
+        current_construction.created_at = datetime.datetime.now()
+        current_construction.source_id = self.id
+      # refresh values
+      current_constuction = self.save_mapping(construction['properties'], current_construction, self.mapping)
+      current_constuction.begin = datetime.datetime(int(construction['properties']['Baubeginn'][0:4]), int(construction['properties']['Baubeginn'][4:6]), int(construction['properties']['Baubeginn'][6:8]), 0, 0, 0)
+      current_constuction.end = datetime.datetime(int(construction['properties']['Bauende'][0:4]), int(construction['properties']['Bauende'][4:6]), int(construction['properties']['Bauende'][6:8]), 23, 59, 59)
+      current_construction.licence_name = self.licence_name
+      #current_construction.licence_url = self.licence_url
+      current_construction.licence_owner = self.contact_company
+      if construction['geometry']['type'] == 'MultiPolygon':
+        current_construction.lat = construction['geometry']['coordinates'][0][0][0][1]
+        current_construction.lon = construction['geometry']['coordinates'][0][0][0][0]
+      elif construction['geometry']['type'] == 'Polygon':
+        current_construction.lat = construction['geometry']['coordinates'][0][0][1]
+        current_construction.lon = construction['geometry']['coordinates'][0][0][0]
+      else:
+        print "New geometry type found"
+      current_construction.area = json.dumps(construction['geometry'])
+      current_construction.updated_at = datetime.datetime.now()
+      # save data
+      db.session.add(current_construction)
+      db.session.commit()
   
 ###############
 ### Hamburg ###
 ###############
 
-class ZuerichStadt(DefaultSource):
+class HamburgStadt(DefaultSource):
   id = 3
   title = u'Stadt Bonn'
   url = 'http://suche.transparenz.hamburg.de/dataset/baustellen-hamburg'

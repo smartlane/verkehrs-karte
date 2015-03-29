@@ -123,23 +123,49 @@ REGIONS = {
     'zoom': 8
   },
   17: {
+    'name': u'Schweiz',
+    'lat': '46.7976552',
+    'lon': '8.236315',
+    'zoom': 8
+  },
+  18: {
+    'name': u'Österreich',
+    'lat': '47.61',
+    'lon': '13.782778',
+    'zoom': 8
+  },
+  19: {
     'name': 'Moers',
     'lat': '51.4573083',
     'lon': '6.6185085',
     'zoom': 11,
     'parent': 10
   },
-  18: {
+  20: {
     'name': 'Rostock',
     'lat': '54.147551',
     'lon': '12.1469532',
     'zoom': 11,
     'parent': 8
   },
-  19: {
+  21: {
     'name': 'Aachen',
     'lat': '50.75968',
     'lon': '6.0965247',
+    'zoom': 11,
+    'parent': 10
+  },
+  22: {
+    'name': u'Bonn',
+    'lat': '50.703577',
+    'lon': '7.1157122',
+    'zoom': 11,
+    'parent': 10
+  },
+  23: {
+    'name': u'Zürich',
+    'lat': '47.377455',
+    'lon': '8.536715',
     'zoom': 11,
     'parent': 10
   }

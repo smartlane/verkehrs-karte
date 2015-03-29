@@ -46,17 +46,24 @@ function get_construction_sites() {
           current_construction_id = construction['id'];
           var html = '<span id="close-sidebar" onclick="close_sidebar();">schließen</span>';
           html += '<h2>Details</h2>';
-          
-          if (construction['begin']) {
-            html += '<h3>Start</h3><p>' + construction['begin'].substr(8, 2) + '.' + construction['begin'].substr(5, 2) + '.' + construction['begin'].substr(0, 4);
-            if (construction['begin'].substr(11, 2) != '00')
-              html += ', ' + construction['begin'].substr(11, 2) + ':' + construction['begin'].substr(14, 2);
-            html += '</p>';
-          }
-          if (construction['begin']) {
-            html += '<h3>Ende</h3><p>' + construction['end'].substr(8, 2) + '.' + construction['end'].substr(5, 2) + '.' + construction['end'].substr(0, 4);
-            if (!((construction['end'].substr(11, 2) == '23' && construction['end'].substr(14, 2) == '59') || (construction['end'].substr(11, 2) == '00' && construction['end'].substr(14, 2) == '00')))
-              html += ', ' + construction['end'].substr(11, 2) + ':' + construction['end'].substr(14, 2);
+          if (construction['begin'] || construction['end']) {
+            html += '<h3>Zeitraum</h3><p>';
+            if (construction['end']) {
+              html += '' + construction['begin'].substr(8, 2) + '.' + construction['begin'].substr(5, 2) + '.' + construction['begin'].substr(0, 4);
+              if (construction['begin'].substr(11, 2) != '00')
+                html += ', ' + construction['begin'].substr(11, 2) + ':' + construction['begin'].substr(14, 2);
+            }
+            else
+              html += 'unbekannt';
+            html += ' bis ';
+            if (construction['end']) {
+              html += construction['end'].substr(8, 2) + '.' + construction['end'].substr(5, 2) + '.' + construction['end'].substr(0, 4);
+              if (!((construction['end'].substr(11, 2) == '23' && construction['end'].substr(14, 2) == '59') || (construction['end'].substr(11, 2) == '00' && construction['end'].substr(14, 2) == '00')))
+                html += ', ' + construction['end'].substr(11, 2) + ':' + construction['end'].substr(14, 2);
+              html += '</p>';
+            }
+            else
+              html += 'unbekannt';
             html += '</p>';
           }
           if (construction['descr'] || construction['external_url']) {
