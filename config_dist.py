@@ -177,5 +177,6 @@ SOURCES = {
   3: 'KoelnStadt',
   4: 'BonnStadt',
   5: 'ZuerichStadt',
-  6: 'HamburgStadt'
+  6: 'HamburgStadt',
+  7: 'NrwMdm'
 }

@@ -12,9 +12,6 @@ from xml.etree import ElementTree
 # apt-get install geographiclib-tools proj-bin
 # download http://geographiclib.sourceforge.net/1.28/geoid.html
 
-class FeatureCollection():
-  contact_company = 'Baustelleninformationssystem des Bundes und der Länder'
-
 class DefaultSource():
   # transforms from gauss kruger to wgs84 decimal
   def gk2latlon(self, x, y, gk_zone):
@@ -23,7 +20,7 @@ class DefaultSource():
     else:
       return False
     # transform gk -> wgs84 degree
-    cmd = "echo %s %s | cs2cs +proj=tmerc +lat_0=0 +lon_0=%s  +k=1.000000 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs +nadgrids=/srv/www/de.mobil-bei-uns/webapp/static/BETA2007.gsb +to +init=epsg:4326" % (x, y, gk_id)
+    cmd = "echo %s %s | cs2cs +proj=tmerc +lat_0=0 +lon_0=%s  +k=1.000000 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs +nadgrids=" + config['BASE_DIR'] + "/misc/BETA2007.gsb +to +init=epsg:4326" % (x, y, gk_id)
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = result.communicate()[0]
     
@@ -407,4 +404,20 @@ class HamburgStadt(DefaultSource):
       # save data
       db.session.add(current_construction)
       db.session.commit()
-  
+
+#################
+### NRW (MDM) ###
+#################
+
+class HamburgStadt(DefaultSource):
+  id = 6
+  title = u'Stadt Hamburg'
+  url = u'http://suche.transparenz.hamburg.de/dataset/baustellen-hamburg'
+  source_url = u'http://geodienste-hamburg.de/HH_WFS_BWVI_opendata?service=WFS&request=GetFeature&VERSION=1.1.0&typename=verkehr_baustellen_prod'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'transparenzportal@kb.hamburg.de'
+  licence_name = u'Datenlizenz Deutschland Namensnennung 2.0'
+  licence_url = u'https://www.govdata.de/dl-de/by-2-0'
+  active = True
+  mapping = {}

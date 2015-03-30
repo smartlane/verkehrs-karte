@@ -1,4 +1,5 @@
 venv
+misc/*.p12
 
 config.py
 *.py[cod]
