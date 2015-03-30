@@ -6,18 +6,21 @@ var current_construction_id = null;
 
 $(document).ready(function() {
   if ($('#map').exists()) {
-    $('#region-select').change(function(event) {
+    $('.scrollable-menu').css({'max-height': $( window ).height() - 74 });
+    $('#menu-collapse').css({'max-height': $( window ).height() - 74 });
+    $('.region').click(function(event) {
       event.preventDefault();
-      map.setView(new L.LatLng(regions[$('#region-select').val()]['lat'], regions[$('#region-select').val()]['lon']), regions[$('#region-select').val()]['zoom']);
+      region_id = $(this).data('regionid');
+      map.setView(new L.LatLng(regions[region_id]['lat'], regions[region_id]['lon']), regions[region_id]['zoom']);
     });
     var ConstructionIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/img/under_construction_icon.png', iconSize: [40, 35] } });
     constructionIcon = new ConstructionIcon();
-    map = new L.Map('map', {});
+    map = new L.Map('map', { attributionControl: false });
     var backgroundLayer = new L.TileLayer('https://otile1-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
       maxZoom: 18,
-      minZoom: 4,
-      attribution: 'Map Data &copy; <a href="http://www.openstreetmap.org">OpenStreetMap</a> contributors, Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a>.'
+      minZoom: 4
     });
+    L.control.attribution({ position: 'bottomleft', 'prefix': false }).addAttribution('Map Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a>,  by <a href="http://leafletjs.com/">Leaflet</a>.'). addTo(map);
     map.setView(new L.LatLng(regions[0]['lat'], regions[0]['lon']), regions[0]['zoom']).addLayer(backgroundLayer);
     if ($('#flashes').exists())
       close_sidebar();

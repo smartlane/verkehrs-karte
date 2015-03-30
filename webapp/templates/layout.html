@@ -33,26 +33,37 @@ regions = {{ dumps(config['REGIONS'].copy())|safe }}
 {% endblock %}
 
 {% block navbar %}
-<div id="navbar" class="navbar navbar-fixed-top">
-  <div id="region">
-    <form id="region-form" method="post">
-      <select id="region-select" name="region-select">
-        {% for region_id, region in config['REGION_DATA'].iteritems() %}
-        <option value="{{ region_id }}">{{ region['name'] }}</option>
-        {% if region['children'] %}{% for subregion_id, subregion in region['children'].iteritems() %}
-        <option class="subregion" value="{{ subregion_id }}">{{ subregion['name'] }}</option>
-        {% endfor %}{% endif %}
-        {% endfor %}
-      </select>
-    </form>
+<nav class="navbar navbar-inverse custom-navbar navbar-fixed-top" id="navbar">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu-collapse">
+        <span class="sr-only">Navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="collapse navbar-collapse" id="menu-collapse">
+      <ul class="nav navbar-nav navbar-left">
+        <li><a href="/">Start</a></li>
+        <li><a href="/information">Infos</a></li>
+        <li><a href="/datenquellen">Daten</a></li>
+        <li><a href="/impressum">Impressum</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Stadt / Region wählen <span class="caret"></span></a>
+          <ul class="dropdown-menu navbar-inverse scrollable-menu" role="menu">
+            {% for region_id, region in config['REGION_DATA'].iteritems() %}
+            <li><a href="#" data-regionid="{{ region_id }}" class="region">{{ region['name'] }}</a>
+            {% if region['children'] %}<ul>{% for subregion_id, subregion in region['children'].iteritems() %}
+            <li><a href="#" data-regionid="{{ subregion_id }}" class="region subregion">{{ subregion['name'] }}</a></li>
+            {% endfor %}</ul>{% endif %}</li>
+            {% endfor %}
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
-  <ul>
-    <li><a href="/">Start</a></li>
-    <li><a href="/information">Infos</a></li>
-    <li><a href="/datenquellen">Daten</a></li>
-    <li><a href="/impressum">Impressum</a></li>
-  </ul>
-</div>
+</nav>
 <div id="footer">
   <a href="http://ruhrmobil-e.de/">Ein Projekt des ruhrmobil-E e.V.</a>
 </div>

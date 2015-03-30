@@ -9,8 +9,81 @@
   color: #999999;
 }
 
-#navbar a, navbar a:hover {
+#navbar a {
   color: #FFFFFF;
+}
+
+#navbar a:hover {
+  color: #333333;
+  background-color: #FFFFFF;
+}
+
+#navbar .navbar-nav ul li ul {
+  padding: 0;
+  list-style: none;
+}
+
+#navbar .navbar-nav ul li ul li {
+  padding-left: 25px;
+}
+
+#navbar .navbar-nav ul li ul li a:before {
+  content: "• ";
+  color: #FFFFFF;
+}
+
+#navbar .navbar-nav ul li ul li:hover a:before {
+  color: #333333;
+}
+
+#navbar .navbar-nav ul li ul li:hover {
+  color: #333333;
+  background-color: #FFFFFF;
+  cursor: pointer;
+}
+
+#navbar .navbar-nav ul li ul li:hover a {
+  color: #333333;
+  text-decoration: none;
+}
+
+#navbar {
+  border: 0 !important;
+  background-color: rgba(0,0,0,0.8);
+}
+
+.scrollable-menu {
+  height: auto;
+  max-height: 400px;
+  overflow-x: hidden;
+}
+
+#navbar .navbar-nav > li > a {
+  font-size: 18px;
+}
+
+@media (max-width:767px) { 
+	.custom-navbar .navbar-right {
+    float: right;
+    padding-right: 15px;
+	}
+	.custom-navbar .nav.navbar-nav.navbar-right li {
+	  float: right;
+	}
+  .custom-navbar .nav.navbar-nav.navbar-right li > a {
+	  padding:8px 5px;
+	}
+	.custom-navbar .navbar-toggle {
+	  float: left
+	}
+	.custom-navbar .navbar-header {
+    float: left;
+    width: auto!important;
+	}
+	.custom-navbar .navbar-collapse {
+    clear: both;
+    float: none;
+	}
 }
 
 .content-text a {
@@ -27,28 +100,6 @@ h2 {
   margin-top: 0;
 }
 
-.navbar {
-  margin-bottom: 0;
-  background-color: rgba(0,0,0,0.8);
-  padding: 5px 10px;
-  border: 0;
-  min-height: 0;
-}
-
-.navbar ul {
-  color: #FFFFFF;
-  font-size: 20px;
-  list-style: none;
-  padding: 0;
-  height: 19px;
-}
-
-.navbar li {
-  list-style: none;
-  float: left;
-  margin-right: 20px;
-}
-
 #map {
   position: absolute;
   top: 0;
@@ -59,7 +110,7 @@ h2 {
 
 #details {
   position: absolute;
-  top: 39px;
+  top: 50px;
   right: 0;
   bottom: 24px;
   width: 290px;
@@ -220,47 +271,4 @@ select {
 
 #image-box {
   text-align: center;
-}
-
-@media (min-width: 500px) and (max-width: 700px) {
-  #logo {
-    display: none;
-  }
-}
-
-
-@media (min-width: 400px) and (max-width: 500px) {
-  #logo, #tutorial {
-    display: none;
-  }
-}
-
-@media (min-width: 350px) and (max-width: 400px) {
-  #logo, #tutorial {
-    display: none;
-  }
-  
-  .navbar ul {
-    font-size: 16px;
-    height: 15px;
-  }
-  
-  #details {
-    top: 35px;
-  }
-}
-
-@media (max-width: 350px) {
-  #logo {
-    display: none;
-  }
-  
-  .navbar ul {
-    font-size: 12px;
-    height: 10px;
-  }
-  
-  #details {
-    top: 30px;
-  }
 }
