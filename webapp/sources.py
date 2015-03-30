@@ -77,14 +77,14 @@ class DefaultSource():
 
 class AachenStadt(DefaultSource):
   id = 1
-  title = ''
-  url = 'http://offenedaten.aachen.de/dataset/baustellen-stadtgebiet-aachen'
-  source_url = 'http://www.bsis.regioit.de/geoserver/BSISPROD/wms?service=wfs&version=2.0.0&request=GetFeature&typeNames=BSISPROD:Baustellen_7Tage_Punkte&outputFormat=json'
-  contact_company = 'Geoservice der Stadt Aachen'
-  contact_name = ''
-  contact_mail = 'offenedaten@mail.aachen.de'
-  licence_name = 'Datenlizenz Deutschland – Namensnennung – Version 2.0'
-  licence_url = 'https://www.govdata.de/dl-de/by-2-0'
+  title = 'Stadt Aachen'
+  url = u'http://offenedaten.aachen.de/dataset/baustellen-stadtgebiet-aachen'
+  source_url = u'http://www.bsis.regioit.de/geoserver/BSISPROD/wms?service=wfs&version=2.0.0&request=GetFeature&typeNames=BSISPROD:Baustellen_7Tage_Punkte&outputFormat=json'
+  contact_company = u'Geoservice der Stadt Aachen'
+  contact_name = u''
+  contact_mail = u'offenedaten@mail.aachen.de'
+  licence_name = u'Datenlizenz Deutschland – Namensnennung – Version 2.0'
+  licence_url = u'https://www.govdata.de/dl-de/by-2-0'
   mapping = {
     'NAME': 'title',
     'EINSCHRAEN': 'restriction',
@@ -129,13 +129,13 @@ class AachenStadt(DefaultSource):
 
 class RostockStadt(DefaultSource):
   id = 2
-  title = 'Stadt Rostock'
-  url = 'https://geo.sv.rostock.de/'
-  source_url = 'https://geo.sv.rostock.de/download/opendata/baustellen/baustellen.json'
-  contact_company = 'Rostock'
-  contact_name = 'Geodienste der Stadt Rostock'
-  contact_mail = 'geodienste@rostock.de'
-  licence_name = 'unbekannt'
+  title = u'Stadt Rostock'
+  url = u'https://geo.sv.rostock.de/'
+  source_url = u'https://geo.sv.rostock.de/download/opendata/baustellen/baustellen.json'
+  contact_company = u'Rostock'
+  contact_name = u'Geodienste der Stadt Rostock'
+  contact_mail = u'geodienste@rostock.de'
+  licence_name = u'unbekannt'
   licence_url = ''
   active = True
   mapping = {
@@ -185,13 +185,13 @@ class RostockStadt(DefaultSource):
 class KoelnStadt(DefaultSource):
   id = 3
   title = u'Stadt Köln'
-  url = 'http://offenedaten-koeln.de/dataset/baustellen-k%C3%B6ln'
-  source_url = 'http://geoportal1.stadt-koeln.de/ArcGIS/rest/services/WebVerkehr_DataOSM/MapServer/0/query?text=&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds=&where=objectid%20is%20not%20null&time=&returnCountOnly=false&returnIdsOnly=false&returnGeometry=true&maxAllowableOffset=&outSR=4326&outFields=%2A&f=json'
-  source_metadata_url = 'http://geoportal1.stadt-koeln.de/ArcGIS/rest/services/WebVerkehr_DataOSM/MapServer/0?f=json&pretty=true'
-  contact_company = 'Stadt Köln'
+  url = u'http://offenedaten-koeln.de/dataset/baustellen-k%C3%B6ln'
+  source_url = u'http://geoportal1.stadt-koeln.de/ArcGIS/rest/services/WebVerkehr_DataOSM/MapServer/0/query?text=&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&objectIds=&where=objectid%20is%20not%20null&time=&returnCountOnly=false&returnIdsOnly=false&returnGeometry=true&maxAllowableOffset=&outSR=4326&outFields=%2A&f=json'
+  source_metadata_url = u'http://geoportal1.stadt-koeln.de/ArcGIS/rest/services/WebVerkehr_DataOSM/MapServer/0?f=json&pretty=true'
+  contact_company = u'Stadt Köln'
   contact_name = u'Stadt Köln'
-  contact_mail = 'e-government@stadt-koeln.de'
-  licence_name = 'Creative Commons Namensnennung 3.0'
+  contact_mail = u'e-government@stadt-koeln.de'
+  licence_name = u'Creative Commons Namensnennung 3.0'
   licence_url = 'http://creativecommons.org/licenses/by/3.0/de/'
   active = True
   mapping = {
@@ -246,13 +246,13 @@ class KoelnStadt(DefaultSource):
 class BonnStadt(DefaultSource):
   id = 4
   title = u'Stadt Bonn'
-  url = 'http://offenedaten-koeln.de/dataset/baustellen-k%C3%B6ln'
-  source_url = 'http://stadtplan.bonn.de/geojson?Thema=14403&koordsys=25832'
-  contact_company = 'Stadt Bonn'
+  url = u'http://offenedaten-koeln.de/dataset/baustellen-k%C3%B6ln'
+  source_url = u'http://stadtplan.bonn.de/geojson?Thema=14403&koordsys=25832'
+  contact_company = u'Stadt Bonn'
   contact_name = u'Stadt Bonn'
-  contact_mail = 'opendata@bonn.de'
-  licence_name = 'Datenlizenz Deutschland Namensnennung'
-  licence_url = 'https://www.govdata.de/dl-de/by-2-0'
+  contact_mail = u'opendata@bonn.de'
+  licence_name = u'Datenlizenz Deutschland Namensnennung'
+  licence_url = u'https://www.govdata.de/dl-de/by-1-0'
   active = True
   mapping = {
     'bezeichnung': 'title',
@@ -300,9 +300,9 @@ class ZuerichStadt(DefaultSource):
   source_url = 'http://data.stadt-zuerich.ch/ogd.4vhCDPd.link'
   contact_company = u'Stadt Zürich'
   contact_name = u'Stadt Zürich'
-  contact_mail = 'opendata@zuerich.ch'
-  licence_name = 'unbekannt'
-  licence_url = ''
+  contact_mail = u'opendata@zuerich.ch'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
   active = True
   mapping = {
     'Name': 'title',
@@ -349,14 +349,14 @@ class ZuerichStadt(DefaultSource):
 
 class HamburgStadt(DefaultSource):
   id = 6
-  title = u'Stadt Bonn'
-  url = 'http://suche.transparenz.hamburg.de/dataset/baustellen-hamburg'
-  source_url = 'http://geodienste-hamburg.de/HH_WFS_BWVI_opendata?service=WFS&request=GetFeature&VERSION=1.1.0&typename=verkehr_baustellen_prod'
+  title = u'Stadt Hamburg'
+  url = u'http://suche.transparenz.hamburg.de/dataset/baustellen-hamburg'
+  source_url = u'http://geodienste-hamburg.de/HH_WFS_BWVI_opendata?service=WFS&request=GetFeature&VERSION=1.1.0&typename=verkehr_baustellen_prod'
   contact_company = u'Freie und Hansestadt Hamburg, Behörde für Wirtschaft Verkehr und Innovation'
   contact_name = u'Stadt Hamburg'
-  contact_mail = 'transparenzportal@kb.hamburg.de'
-  licence_name = 'Datenlizenz Deutschland Namensnennung 2.0'
-  licence_url = 'https://www.govdata.de/dl-de/by-2-0'
+  contact_mail = u'transparenzportal@kb.hamburg.de'
+  licence_name = u'Datenlizenz Deutschland Namensnennung 2.0'
+  licence_url = u'https://www.govdata.de/dl-de/by-2-0'
   active = True
   mapping = {}
   

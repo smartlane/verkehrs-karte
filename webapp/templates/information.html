@@ -3,9 +3,40 @@
 {% block content %}
 <div id="content-tree-info" class="content-text">
   <h1>Informationen</h1>
-  <p><img src='/static/img/under_construction.svg' alt='Baustelle' />Baustelle</p>
-  <h2>Die Hintergründe</h2>
-  <p>Verkehrskarte.de stellt aktuelle Baustelleninformationen für Moers dar. Ziel ist es über Schnittstellen zukünftig Informationen für weitere Städte anzubinden.</p>
-  <p>Bei Verkehrskarte.de handelt es sich um ein OpenData und OpenSource Projekt mit einer offenen API. Details hierzu finden sich <a href="/api">auf einer separaten Seite.</a> Dort ist u.a. auch beschrieben, wie die Stadt-Daten abgerufen wurden.</p>
+  <p>Die Website "Mobil Bei Uns" sammelt Verkehrsbehinderungen aus verschiedenen offenen Quellen und stellt sie gemeinsam auf einer Karte dar.</p>
+  <h2>Die Nutzung</h2>
+  <p>Alle Verkehrsbehinderungen können auf der Karte eingesehen werden. Über den Menüpunkt "Region / Stadt auswählen" lassen sich bestimmte Regionen zentrieren.</p>
+  <p>Alle Daten können auch zur weiteren Verwendung via JSON-Schnittstelle abgerufen werden. Auf <a href="/daten">einer separaten Seite gibt es Details zu der API</a>.</p>
+  <h2>Datenquellen</h2>
+  <p>Folgende Quellen werden zur Zeit berücksichtig:</p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Stadt</th>
+        <th>Lizenz</th>
+        <th>Link</th>
+        <th>Kontakt</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for source in sources %}
+      <tr>
+        <th scope="row">{{ source.id }}</th>
+        <td>{{ source.title }}</td>
+        <td>{% if source.licence_url %}<a href="{{ source.licence_url }}">{% endif %}{{ source.licence_name }}{% if source.licence_url %}</a>{% endif %}</td>
+        <td><a href="{{ source.url }}">Datensatz-Website</a></td>
+        <td><a href="mailto:{{ source.contact_mail }}">{{ source.contact_mail }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h2>Neue Datenquellen</h2>
+  <p>Um eine neue Stadt hier aufzunehmen, werden die Daten als OpenData benötigt. OpenData bedeutet: Die Daten müssen als JSON-, XML- oder CSV-Datei vorliegen. Sie müssen eine freie Lizenz haben (bestenfalls CC-0). Und für den hier genutzten Abruf müssen die Daten immer unter derselben URL verfügbar sein.</p>
+  <p>Als Bürger einer Stadt können Sie einfach eine E-Mail an Ihre Verwaltung schreiben, um dies anzustoßen. Als Mitarbeiter einer Stadt können Sie anfangen, eine OpenData Strategie für Ihre Stadt zu entwickeln - die <a href="http://okfn.de/">OKF Deutschland</a> hilft Ihnen dabei gerne.</p>
+  <h2>Elektromobilität?</h2>
+  <p>"Mobil Bei Uns" ist <a href="http://ruhrmobil-e.de/">ein Projekt des ruhrmobil-E e.V.</a>, eines Vereins für Elektromobilität und regenerativer Energie. Wir glauben, dass die Mobilität der Zukunft nur vernetzt funktionieren kann. Für eine vernetzte Mobilität sind Daten der wichtigste Rohstoff: z.B. eben Verkehrsbehinderungen.</p>
+  <h2>Die Zukunft</h2>
+  <p>Wir wollen nicht nicht nur bei Baustellen bleiben, sondern auch weitere Datenquellen integrieren. Dies könnten z.B. sein: ÖPNV-Verspätungen, defekte Aufzuüge, Staus, ... etc.</p>
 </div>
 {% endblock %}

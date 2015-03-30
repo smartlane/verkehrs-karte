@@ -33,6 +33,7 @@ import json, time, os, datetime
 from subprocess import call
 from sqlalchemy import or_
 import socket
+import sources
 
 
 @app.route('/')
@@ -126,188 +127,27 @@ def construction_details():
   response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
   return(response)
 
-'''@app.route("/new-tree", methods=['GET', 'POST'])
-def new_tree():
-  tree = Tree()
-  tree_form = NewTree(request.form, tree)
-  if request.method == 'POST' and tree_form.validate():
-    tree_form.populate_obj(tree)
-    tree.city = 'Bochum'
-    tree.public = 0
-    tree.source = 'Nutzer'
-    tree.created_at = datetime.datetime.now()
-    tree.modified_at = datetime.datetime.now()
-    tree.ip = request.remote_addr
-    tree.hostname = socket.gethostbyaddr(request.remote_addr)[0]
-    db.session.add(tree)
-    db.session.commit()
-    msg = Message(recipients=app.config['INFO_MAIL_RECIPIENTS'],
-      sender=app.config['INFO_MAIL_SENDER'],
-      body=u"ID: %s" % tree.id,
-      subject=u"Neuer Baum wurde eingereicht")
-    mail.send(msg)
-    if request.files['picture'].filename:
-      image_data = request.files['picture'].read()
-      # write new image data
-      open(os.path.join(app.config['IMAGE_UPLOAD_PATH_BASE'], str(tree.id) + '.jpg'), 'w').write(image_data)
-      call(['/usr/bin/convert', '-resize', '270x270', os.path.join(app.config['IMAGE_UPLOAD_PATH_BASE'], str(tree.id) + '.jpg'), os.path.join(app.config['IMAGE_UPLOAD_PATH_BASE'], str(tree.id) + '-small.jpg')])
-      tree.picture = 1
-      db.session.add(tree)
-      db.session.commit()
-    flash(u'Eintrag wurde gespeichert und wird nun geprüft. Danke fürs Mitwirken!')
-    return redirect("/")
-  return render_template('new-tree.html', tree_form=tree_form)
-'''
-
-'''
-@app.route('/tree-suggest', methods=['GET', 'POST'])
-def tree_suggest():
-  start_time = time.time()
-  tree_suggest = TreeSuggest()
-  try:
-    tree_suggest.tree_id = int(request.args.get('id'))
-    tree_suggest.field = request.args.get('field')
-    if tree_suggest.field == 'picture':
-      tree_suggest.value = 0
-    else:
-      tree_suggest.value = request.args.get('value')
-    tree_suggest.created_at = datetime.datetime.now()
-    tree_suggest.ip = request.remote_addr
-    tree_suggest.hostname = socket.gethostbyaddr(request.remote_addr)[0]
-  except ValueError, TypeError:
-    abort(500)
-  db.session.add(tree_suggest)
-  db.session.commit()
-  msg = Message(recipients=app.config['INFO_MAIL_RECIPIENTS'],
-    sender=app.config['INFO_MAIL_SENDER'],
-    body=u"ID: %s\nFeld: %s" % (tree_suggest.tree_id, tree_suggest.field),
-    subject=u"Neuer Änderungsvorschlag wurde eingereicht")
-  mail.send(msg)
-  if tree_suggest.field == 'picture' and request.files['picture'].filename:
-    image_data = request.files['picture'].read()
-    # write new image data
-    open(os.path.join(app.config['SUGGEST_IMAGE_UPLOAD_PATH_BASE'], str(tree_suggest.id) + '.jpg'), 'w').write(image_data)
-    call(['/usr/bin/convert', '-resize', '270x270', os.path.join(app.config['SUGGEST_IMAGE_UPLOAD_PATH_BASE'], str(tree_suggest.id) + '.jpg'), os.path.join(app.config['SUGGEST_IMAGE_UPLOAD_PATH_BASE'], str(tree_suggest.id) + '-small.jpg')])
-    tree_suggest.value = 1
-    db.session.add(tree_suggest)
-    db.session.commit()
-  ret = {
-    'status': 0,
-    'duration': round((time.time() - start_time) * 1000),
-    'request': {},
-    'response': True
-  }
-  json_output = json.dumps(ret, cls=util.MyEncoder, sort_keys=True)
-  response = make_response(json_output, 200)
-  response.mimetype = 'application/json'
-  response.headers['Pragma'] = 'no-cache'
-  response.headers['Expires'] = -1
-  response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-  return(response)
-'''
-
 @app.route("/information")
 def information():
-  return render_template('information.html')
+  data_sources = []
+  for source_id, source_name in app.config['SOURCES'].iteritems():
+    source_class = getattr(sources, source_name)
+    source_object = source_class()
+    data_sources.append({
+      'id': source_object.id,
+      'title': source_object.title,
+      'url': source_object.url,
+      'contact_mail': source_object.contact_mail,
+      'licence_url': source_object.licence_url,
+      'licence_name': source_object.licence_name
+    })
+  return render_template('information.html', sources=data_sources)
 
 @app.route("/impressum")
 def impressum():
   return render_template('impressum.html')
 
-@app.route("/api")
+@app.route("/daten")
 def api():
-  return render_template('api.html')
-
-@app.route("/anleitung")
-def anleitung():
-  return render_template('anleitung.html')
-
-@app.route("/admin")
-@basic_auth.required
-def admin():
-  constructions = ConstructionSite.query.all()
-  return render_template('admin.html', constructions=constructions)
-
-@app.route("/admin/suggest")
-@basic_auth.required
-def admin_suggest():
-  tree_suggestions = TreeSuggest.query.all()
-  return render_template('admin_suggest.html', tree_suggestions=tree_suggestions)
-
-@app.route("/admin-action")
-@basic_auth.required
-def admin_action():
-  start = time.time()
-  jsonp_callback = request.args.get('callback', None)
-  action_type = request.args.get('type', 0)
-  if action_type == 'update':
-    field = request.args.get('field', 0)
-    value = request.args.get('value', 0)
-    tree_id = int(request.args.get('tree_id', 0))
-    tree = Tree.query.filter_by(id=tree_id).first_or_404()
-    setattr(tree, field, value)
-    db.session.add(tree)
-    db.session.commit()
-  tree_suggest_id = int(request.args.get('tree_suggest_id', 0))
-  if tree_suggest_id and action_type == 'update':
-    if field == 'picture':
-      os.rename(os.path.join(app.config['SUGGEST_IMAGE_UPLOAD_PATH_BASE'], str(tree_suggest_id) + '.jpg'), os.path.join(app.config['IMAGE_UPLOAD_PATH_BASE'], str(tree_id) + '.jpg'))
-      os.rename(os.path.join(app.config['SUGGEST_IMAGE_UPLOAD_PATH_BASE'], str(tree_suggest_id) + '-small.jpg'), os.path.join(app.config['IMAGE_UPLOAD_PATH_BASE'], str(tree_id) + '-small.jpg'))
-  if tree_suggest_id:
-    tree_suggest = TreeSuggest.query.filter_by(id=tree_suggest_id).first_or_404()
-    db.session.delete(tree_suggest)
-    db.session.commit()
-  obj = {
-    'result': 1
-  }
-  obj['duration'] = int((time.time() - start) * 1000)
-  json_output = json.dumps(obj, sort_keys=True)
-  if jsonp_callback is not None:
-      json_output = jsonp_callback + '(' + json_output + ')'
-  response = make_response(json_output, 200)
-  response.mimetype = 'application/json'
-  response.headers['Pragma'] = 'no-cache'
-  response.headers['Expires'] = -1
-  response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-  return response
-  
-@app.route('/admin/suggest-tree-picture')
-@basic_auth.required
-def admin_picture_suggest():
-  image_id = int(request.args.get('id', 0))
-  size = request.args.get('size', '')
-  if size:
-    size = '-' + size
-  if image_id:
-    return send_file(os.path.join(app.config['SUGGEST_IMAGE_UPLOAD_PATH_BASE'], str(image_id) + size + '.jpg'), mimetype='image/jpeg')
-  else:
-    abort(400)
-
-
-@app.route("/geocode")
-def geocode():
-  start = time.time()
-  jsonp_callback = request.args.get('callback', None)
-  address = request.args.get('address', '')
-  lat = request.args.get('lat', '')
-  lng = request.args.get('lng', '')
-  if address == '' and not (lat != '' and lng != ''):
-    abort(400)
-  if address:
-    location_string = ', '.join([address, app.config['GEOCODING_DEFAULT_CITY']])
-  else:
-    location_string = ', '.join([lat, lng])
-  obj = {
-    'result': util.geocode(location_string)
-  }
-  obj['duration'] = int((time.time() - start) * 1000)
-  json_output = json.dumps(obj, sort_keys=True)
-  if jsonp_callback is not None:
-    json_output = jsonp_callback + '(' + json_output + ')'
-  response = make_response(json_output, 200)
-  response.mimetype = 'application/json'
-  response.headers['Pragma'] = 'no-cache'
-  response.headers['Expires'] = -1
-  response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-  return response
+  return render_template('daten.html')
 
