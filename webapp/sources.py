@@ -86,6 +86,7 @@ class DefaultSource():
           setattr(current_construction, mapping_to, source_data[mapping_from])
     return current_construction
   
+  # openssl pkcs12 -in dev.ernestoruge.de.p12 -out package.pem -node
   def sync_mdm(self):
     cmd = " wget -q --certificate misc/%s.crt --private-key misc/%s.key --ca-certificate misc/%s.chain.ca %s -O - | gunzip" % (app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], self.source_url)
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
