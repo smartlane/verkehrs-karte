@@ -1,5 +1,10 @@
 venv
 misc/*.p12
+misc/*.crt
+misc/*.pem
+misc/*.key
+misc/*.ca
+misc/LCL*.csv
 
 config.py
 *.py[cod]

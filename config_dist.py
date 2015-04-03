@@ -18,6 +18,7 @@ BASIC_AUTH_USERNAME = 'admin-username'
 BASIC_AUTH_PASSWORD = 'admin-password'
 BASIC_AUTH_REALM = 'Bitte geben Sie Nutzername und Passwort fuer das Admin-Interface ein.'
 
+MDM_CERT_FILE = 'dein-cert'
 
 REGIONS = {
   0: {
@@ -178,5 +179,15 @@ SOURCES = {
   4: 'BonnStadt',
   5: 'ZuerichStadt',
   6: 'HamburgStadt',
-  7: 'NrwMdm'
+  7: 'NordrheinwestfalenMdm',
+  8: 'BadenwuerttembergMdm',
+  9: 'BayernMdm',
+  10: 'BrandenburgMdm',
+  11: 'BremenMdm',
+  12: 'HamburgMdm',
+  13: 'HessenMdm',
+  14: 'MecklenburgvorpommernMdm',
+  15: 'SachsenMdm',
+  16: 'SachsenanhaltMdm',
+  17: 'ThueringenMdm'
 }

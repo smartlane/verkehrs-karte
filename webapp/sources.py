@@ -8,6 +8,7 @@ import json
 import datetime
 import re
 from xml.etree import ElementTree
+import csv
 
 # apt-get install geographiclib-tools proj-bin
 # download http://geographiclib.sourceforge.net/1.28/geoid.html
@@ -20,7 +21,7 @@ class DefaultSource():
     else:
       return False
     # transform gk -> wgs84 degree
-    cmd = "echo %s %s | cs2cs +proj=tmerc +lat_0=0 +lon_0=%s  +k=1.000000 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs +nadgrids=" + config['BASE_DIR'] + "/misc/BETA2007.gsb +to +init=epsg:4326" % (x, y, gk_id)
+    cmd = "echo %s %s | cs2cs +proj=tmerc +lat_0=0 +lon_0=%s  +k=1.000000 +x_0=2500000 +y_0=0 +ellps=bessel +units=m +no_defs +nadgrids=%s/misc/BETA2007.gsb +to +init=epsg:4326" % (x, y, gk_id, app.config['BASE_DIR'])
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = result.communicate()[0]
     
@@ -39,7 +40,7 @@ class DefaultSource():
     result = result.split()
     return {'lat': result[0], 'lon': result[1]}
   
-  def epsg258322wsg84(self, x, y):
+  def epsg258322latlon(self, x, y):
     # transform epsg258322 -> wgs84 degree
     cmd = "echo %s %s | cs2cs +init=epsg:25832 +to +init=epsg:4326" % (x, y)
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -60,6 +61,23 @@ class DefaultSource():
     result = result.split()
     return {'lat': result[0], 'lon': result[1]}
   
+  def deref_lcl(self, lcl_id):
+    with open('%s/misc/%s' % (app.config['BASE_DIR'], app.config['LCL_FILE']), 'rb') as csvfile:
+      lcl_file = csv.reader(csvfile, delimiter=';', quotechar="\"")
+      first = True
+      for lcl_dataset in lcl_file:
+        if first:
+          first = False
+        else:
+          if lcl_dataset[0]:
+            if int(lcl_dataset[0]) == int(lcl_id):
+              if lcl_dataset[28] and lcl_dataset[29]:
+                result = {
+                  'lat': float(lcl_dataset[29].replace('+', '')) / 100000,
+                  'lon': float(lcl_dataset[28].replace('+', '')) / 100000
+                }
+                return result
+    return False
   
   def save_mapping(self, source_data, current_construction, mapping):
     for mapping_from, mapping_to in mapping.iteritems():
@@ -67,6 +85,183 @@ class DefaultSource():
         if source_data[mapping_from]:
           setattr(current_construction, mapping_to, source_data[mapping_from])
     return current_construction
+  
+  def sync_mdm(self):
+    cmd = " wget -q --certificate misc/%s.crt --private-key misc/%s.key --ca-certificate misc/%s.chain.ca %s -O - | gunzip" % (app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], self.source_url)
+    result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = result.communicate()[0]
+    data = ElementTree.fromstring(result)
+    xml_prefix = '{http://datex2.eu/schema/2/2_0}'
+    attrib_prefix = '{http://www.w3.org/2001/XMLSchema-instance}'
+    for item in data:
+      if item.tag == '%spayloadPublication' % xml_prefix:
+        data = item
+    for dataset in data:
+      if dataset.tag == '%ssituation' % xml_prefix:
+        dataset_result = []
+        for subdataset in dataset:
+          subdataset_result = {}
+          if subdataset.tag == '%ssituationRecord' % xml_prefix:
+            subdataset_result['descr'] = []
+            subdataset_result['external_id'] = subdataset.attrib['id']
+            for item in subdataset:
+              if item.tag == '%svalidity' % xml_prefix:
+                for sub1item in item:
+                  if sub1item.tag == '%svalidityTimeSpecification' % xml_prefix:
+                    for sub2item in sub1item:
+                      if sub2item.tag == '%soverallStartTime' % xml_prefix:
+                        subdataset_result['begin'] = dateutil.parser.parse(sub2item.text).replace(tzinfo=None)
+                      elif sub2item.tag == '%soverallEndTime' % xml_prefix:
+                        subdataset_result['end'] = dateutil.parser.parse(sub2item.text).replace(tzinfo=None)
+              elif item.tag == '%sgeneralPublicComment' % xml_prefix:
+                for sub1item in item:
+                  if sub1item.tag == '%scomment' % xml_prefix:
+                    for sub2item in sub1item:
+                      if sub2item.tag == '%svalues' % xml_prefix:
+                        for sub3item in sub2item:
+                          if sub3item.tag == '%svalue' % xml_prefix:
+                            subdataset_result['reason'] = sub3item.text
+              elif item.tag == '%sgroupOfLocations' % xml_prefix:
+                if item.attrib['%stype' % attrib_prefix] == 'Point':
+                  for sub1item in item:
+                    if sub1item.tag == '%salertCPoint' % xml_prefix:
+                      for sub2item in sub1item:
+                        if sub2item.tag == '%salertCMethod2PrimaryPointLocation' % xml_prefix:
+                          for sub3item in sub2item:
+                            if sub3item.tag == '%salertCLocation' % xml_prefix:
+                              for sub4item in sub3item:
+                                if sub4item.tag == '%salertCLocationName' % xml_prefix:
+                                  for sub5item in sub4item:
+                                    if sub5item.tag == '%svalues' % xml_prefix:
+                                      for sub6item in sub5item:
+                                        if sub6item.tag == '%svalue' % xml_prefix:
+                                          subdataset_result['location_descr'] = sub6item.text
+                                elif sub4item.tag == '%sspecificLocation' % xml_prefix:
+                                  if sub4item.text:
+                                    result = self.deref_lcl(sub4item.text)
+                                    if result:
+                                      subdataset_result.update(result)
+                                    else:
+                                      print "Warning: ID %s unknown" % sub4item.text
+                                  else:
+                                    print 'Warning: No location given!'
+                elif item.attrib['%stype' % attrib_prefix] == 'Linear':
+                  subdataset_result['area'] = {}
+                  subdataset_result['location_descr'] = {}
+                  for sub1item in item:
+                    if sub1item.tag == '%ssupplementaryPositionalDescription' % xml_prefix:
+                      for sub2item in sub1item:
+                        if sub2item.tag == '%saffectedCarriagewayAndLanes' % xml_prefix:
+                          for sub3item in sub2item:
+                            if sub3item.tag == '%slengthAffected' % xml_prefix:
+                              subdataset_result['location_descr']['length'] = int(round(float(sub3item.text)))
+                    elif sub1item.tag == '%salertCLinear' % xml_prefix:
+                      for sub2item in sub1item:
+                        if sub2item.tag == '%salertCMethod2PrimaryPointLocation' % xml_prefix:
+                          for sub3item in sub2item:
+                            if sub3item.tag == '%salertCLocation' % xml_prefix:
+                              for sub4item in sub3item:
+                                if sub4item.tag == '%salertCLocationName' % xml_prefix:
+                                  for sub5item in sub4item:
+                                    if sub5item.tag == '%svalues' % xml_prefix:
+                                      for sub6item in sub5item:
+                                        if sub6item.tag == '%svalue' % xml_prefix:
+                                          subdataset_result['location_descr']['von'] = sub6item.text
+                                elif sub4item.tag == '%sspecificLocation' % xml_prefix:
+                                  if sub4item.text:
+                                    result = self.deref_lcl(sub4item.text)
+                                    if result:
+                                      subdataset_result.update(result)
+                                      subdataset_result['area']['start'] = result
+                                    else:
+                                      print "Warning: ID %s unknown" % sub4item.text
+                                  else:
+                                    print 'Warning: No location given!'
+                        elif sub2item.tag == '%salertCMethod2SecondaryPointLocation' % xml_prefix:
+                          for sub3item in sub2item:
+                            if sub3item.tag == '%salertCLocation' % xml_prefix:
+                              for sub4item in sub3item:
+                                if sub4item.tag == '%salertCLocationName' % xml_prefix:
+                                  for sub5item in sub4item:
+                                    if sub5item.tag == '%svalues' % xml_prefix:
+                                      for sub6item in sub5item:
+                                        if sub6item.tag == '%svalue' % xml_prefix:
+                                          subdataset_result['location_descr']['bis'] = sub6item.text
+                                elif sub4item.tag == '%sspecificLocation' % xml_prefix:
+                                  if sub4item.text:
+                                    result = self.deref_lcl(sub4item.text)
+                                    if result:
+                                      subdataset_result['area']['end'] = result
+                                    else:
+                                      print "Warning: ID %s unknown" % sub4item.text
+                                  else:
+                                    print 'Warning: No location given!'
+                    elif sub1item.tag == '%slinearWithinLinearElement' % xml_prefix:
+                      for sub2item in sub1item:
+                        if sub2item.tag == '%slinearElement' % xml_prefix:
+                          for sub3item in sub2item:
+                            if sub3item.tag == '%sroadNumber' % xml_prefix:
+                              subdataset_result['location_descr']['street'] = sub3item.text
+                  if 'von' in subdataset_result['location_descr'] and 'bis' in subdataset_result['location_descr']:
+                    location_string = ''
+                    if 'street' in subdataset_result['location_descr']:
+                      location_string = '%s ' % subdataset_result['location_descr']['street']
+                    location_string += 'von %s bis %s' % (subdataset_result['location_descr']['von'], subdataset_result['location_descr']['bis'])
+                    if 'length' in subdataset_result['location_descr']:
+                      location_string += u' (Länge: %s m)' % subdataset_result['location_descr']['length']
+                    subdataset_result['location_descr'] = location_string
+                  else:
+                    del subdataset_result['location_descr']
+                  if 'start' in subdataset_result['area'] and 'end' in subdataset_result['area']:
+                    subdataset_result['area'] = "{\"coordinates\": [[%s, %s], [%s, %s]], \"type\": \"LineString\"}" % (subdataset_result['area']['start']['lat'], subdataset_result['area']['start']['lon'], subdataset_result['area']['end']['lat'], subdataset_result['area']['end']['lon'])
+                  else:
+                    del subdataset_result['area']
+                else:
+                  print "New GeoType detected"
+              elif item.tag == '%soperatorActionExtension' % xml_prefix:
+                for sub1item in item:
+                  if sub1item.tag == '%soperatorActionExtended' % xml_prefix:
+                    for sub2item in sub1item:
+                      if sub2item.tag == '%stemporarySpeedLimit' % xml_prefix:
+                        subdataset_result['descr'].append('Geschwindigkeitsbegrenzung: %s km/h' % int(round(float(sub2item.text))))
+            if subdataset_result['descr']:
+              subdataset_result['descr'] = ', '.join(subdataset_result['descr'])
+            else:
+              del subdataset_result['descr']
+            if 'external_id' in subdataset_result and 'lat' in subdataset_result and 'lon' in subdataset_result:
+              current_external_id = subdataset_result['external_id']
+              current_construction = ConstructionSite.query.filter_by(external_id=current_external_id).filter_by(source_id=self.id).first()
+              # no database entry
+              if not current_construction:
+                current_construction = ConstructionSite()
+                current_construction.external_id = current_external_id
+                current_construction.created_at = datetime.datetime.now()
+                current_construction.source_id = self.id
+              if 'area' in subdataset_result:
+                current_construction.area = subdataset_result['area']
+              if 'lat' in subdataset_result:
+                current_construction.lat = subdataset_result['lat']
+              if 'lon' in subdataset_result:
+                current_construction.lon = subdataset_result['lon']
+              if 'descr' in subdataset_result:
+                current_construction.descr = subdataset_result['descr']
+              if 'location_descr' in subdataset_result:
+                current_construction.location_descr = subdataset_result['location_descr']
+              if 'reason' in subdataset_result:
+                current_construction.reason = subdataset_result['reason']
+              if 'begin' in subdataset_result:
+                current_construction.begin = subdataset_result['begin']
+              if 'end' in subdataset_result:
+                current_construction.end = subdataset_result['end']
+              current_construction.licence_name = self.licence_name
+              current_construction.licence_url = self.licence_url
+              current_construction.licence_owner = self.contact_company
+              current_construction.updated_at = datetime.datetime.now()
+              # save data
+              db.session.add(current_construction)
+              db.session.commit()
+  
+  
   
 ##############
 ### Aachen ###
@@ -145,7 +340,7 @@ class RostockStadt(DefaultSource):
   }
 
   def sync(self):
-    request_data = requests.get(self.source_url)
+    request_data = requests.get(self.source_url, verify=True)
     data = json.loads(request_data.content)
     for construction in data['features']:
       current_external_id = construction['properties']['uuid']
@@ -278,7 +473,7 @@ class BonnStadt(DefaultSource):
       current_construction.licence_name = self.licence_name
       current_construction.licence_url = self.licence_url
       current_construction.licence_owner = self.contact_company
-      position = self.epsg258322wsg84(construction['geometry']['coordinates'][0], construction['geometry']['coordinates'][1])
+      position = self.epsg258322latlon(construction['geometry']['coordinates'][0], construction['geometry']['coordinates'][1])
       current_construction.lat = position['lat']
       current_construction.lon = position['lon']
       current_construction.updated_at = datetime.datetime.now()
@@ -393,7 +588,7 @@ class HamburgStadt(DefaultSource):
         elif item.tag == '{http://www.deegree.org/app}art':
           current_construction.descr = item.text
         elif item.tag == '{http://www.deegree.org/app}geom':
-          location = self.epsg258322wsg84(item[0][0].text.split()[0], item[0][0].text.split()[1])
+          location = self.epsg258322latlon(item[0][0].text.split()[0], item[0][0].text.split()[1])
           current_construction.lat = location['lat']
           current_construction.lon = location['lon']
       current_construction.location_descr = ' '.join(location_descr)
@@ -409,15 +604,178 @@ class HamburgStadt(DefaultSource):
 ### NRW (MDM) ###
 #################
 
-class HamburgStadt(DefaultSource):
-  id = 6
-  title = u'Stadt Hamburg'
-  url = u'http://suche.transparenz.hamburg.de/dataset/baustellen-hamburg'
-  source_url = u'http://geodienste-hamburg.de/HH_WFS_BWVI_opendata?service=WFS&request=GetFeature&VERSION=1.1.0&typename=verkehr_baustellen_prod'
+class NordrheinwestfalenMdm(DefaultSource):
+  id = 7
+  title = u'Nordrhein-Westfalen (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645005/clientPullService?subscriptionID=2645005'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
-  contact_mail = u'transparenzportal@kb.hamburg.de'
-  licence_name = u'Datenlizenz Deutschland Namensnennung 2.0'
-  licence_url = u'https://www.govdata.de/dl-de/by-2-0'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
   active = True
   mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class BadenwuerttembergMdm(DefaultSource):
+  id = 8
+  title = u'Baden-Württemberg (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644004/clientPullService?subscriptionID=2644004'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class BayernMdm(DefaultSource):
+  id = 9
+  title = u'Bayern (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644005/clientPullService?subscriptionID=2644005'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class BrandenburgMdm(DefaultSource):
+  id = 10
+  title = u'Brandenburg (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644006/clientPullService?subscriptionID=2644006'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class BremenMdm(DefaultSource):
+  id = 11
+  title = u'Bremen (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644007/clientPullService?subscriptionID=2644007'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class HamburgMdm(DefaultSource):
+  id = 12
+  title = u'Hamburg (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645002/clientPullService?subscriptionID=2645002'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class HessenMdm(DefaultSource):
+  id = 13
+  title = u'Hessen (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645003/clientPullService?subscriptionID=2645003'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class MecklenburgvorpommernMdm(DefaultSource):
+  id = 14
+  title = u'Mecklenburg-Vorpommern (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645004/clientPullService?subscriptionID=2645004'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class SachsenMdm(DefaultSource):
+  id = 15
+  title = u'Sachsen (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645006/clientPullService?subscriptionID=2645006'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class SachsenanhaltMdm(DefaultSource):
+  id = 16
+  title = u'Sachsen-Anhalt (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645007/clientPullService?subscriptionID=2645007'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class ThueringenMdm(DefaultSource):
+  id = 17
+  title = u'Thüringen (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645008/clientPullService?subscriptionID=2645008'
+  contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
