@@ -11,6 +11,7 @@
 {% block scripts %}
 {{super()}}
 <script src="{{url_for('.static', filename='js/leaflet.js')}}" type="text/javascript"></script>
+<script src="{{url_for('.static', filename='js/leaflet.markercluster.js')}}" type="text/javascript"></script>
 <script src="{{url_for('.static', filename='js/lightbox.min.js')}}"></script>
 <!-- Piwik -->
 <script type="text/javascript">

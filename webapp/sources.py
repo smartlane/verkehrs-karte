@@ -9,6 +9,8 @@ import datetime
 import re
 from xml.etree import ElementTree
 import csv
+import util
+from copy import deepcopy
 
 # apt-get install geographiclib-tools proj-bin
 # download http://geographiclib.sourceforge.net/1.28/geoid.html
@@ -202,11 +204,11 @@ class DefaultSource():
                         if sub2item.tag == '%slinearElement' % xml_prefix:
                           for sub3item in sub2item:
                             if sub3item.tag == '%sroadNumber' % xml_prefix:
-                              subdataset_result['location_descr']['street'] = sub3item.text
+                              subdataset_result['street'] = sub3item.text
                   if 'von' in subdataset_result['location_descr'] and 'bis' in subdataset_result['location_descr']:
                     location_string = ''
-                    if 'street' in subdataset_result['location_descr']:
-                      location_string = '%s ' % subdataset_result['location_descr']['street']
+                    if 'street' in subdataset_result:
+                      location_string = '%s ' % subdataset_result['street']
                     location_string += 'von %s bis %s' % (subdataset_result['location_descr']['von'], subdataset_result['location_descr']['bis'])
                     if 'length' in subdataset_result['location_descr']:
                       location_string += u' (Länge: %s m)' % subdataset_result['location_descr']['length']
@@ -214,7 +216,86 @@ class DefaultSource():
                   else:
                     del subdataset_result['location_descr']
                   if 'start' in subdataset_result['area'] and 'end' in subdataset_result['area']:
-                    subdataset_result['area'] = "{\"coordinates\": [[%s, %s], [%s, %s]], \"type\": \"LineString\"}" % (subdataset_result['area']['start']['lat'], subdataset_result['area']['start']['lon'], subdataset_result['area']['end']['lat'], subdataset_result['area']['end']['lon'])
+                    #subdataset_result['area'] = "{\"coordinates\": [[%s, %s], [%s, %s]], \"type\": \"LineString\"}" % (subdataset_result['area']['start']['lat'], subdataset_result['area']['start']['lon'], subdataset_result['area']['end']['lat'], subdataset_result['area']['end']['lon'])
+                    
+                    # We need the route from A to B to get the real construction site position
+                    if subdataset_result['area']['start']['lat'] > subdataset_result['area']['end']['lat']:
+                      route_n = subdataset_result['area']['start']['lat']
+                      route_s = subdataset_result['area']['end']['lat']
+                    else:
+                      route_n = subdataset_result['area']['end']['lat']
+                      route_s = subdataset_result['area']['start']['lat']
+                    if subdataset_result['area']['start']['lon'] > subdataset_result['area']['end']['lon']:
+                      route_e = subdataset_result['area']['start']['lon']
+                      route_w = subdataset_result['area']['end']['lon']
+                    else:
+                      route_e = subdataset_result['area']['end']['lon']
+                      route_w = subdataset_result['area']['start']['lon']
+                    if route_n == route_s:
+                      route_s -= 0.01
+                      route_n += 0.01
+                    if route_e == route_w:
+                      route_e -= 0.01
+                      route_w += 0.01
+                    overpass_url = "http://www.overpass-api.de/api/interpreter?data=node(%s,%s,%s,%s);way(bn);way._[\"highway\"=\"motorway\"];(._;>;);out;" % (route_s, route_w, route_n, route_e)
+                    overpass_result = requests.get(overpass_url)
+                    overpass_data = ElementTree.fromstring(overpass_result.content)
+                    node_list = {}
+                    way_piece_list = {}
+                    for item in overpass_data:
+                      if item.tag == 'node':
+                        node_list[item.attrib['id']] = [float(item.attrib['lat']), float(item.attrib['lon'])]
+                      else:
+                        steet_name = ''
+                        if item.tag == 'way':
+                          current_way = []
+                          for subitem in item:
+                            if subitem.tag == 'nd':
+                              current_way.append(subitem.attrib['ref'])
+                            elif subitem.tag == 'tag':
+                              if subitem.attrib['k'] == 'ref':
+                                steet_name = subitem.attrib['v']
+                        # just add when it's the right street name
+                        if steet_name.replace(' ', '') == subdataset_result['street']:
+                          way_piece_list[item.attrib['id']] = current_way
+                    # Chain ways
+                    way_list = []
+                    if len(way_piece_list):
+                      while len(way_piece_list):
+                        key = way_piece_list.keys()[0]
+                        current_way = way_piece_list[key]
+                        del way_piece_list[key]
+                        found = True
+                        while found:
+                          found = False
+                          new_way_piece_list = deepcopy(way_piece_list)
+                          for key, way_piece in way_piece_list.iteritems():
+                            if way_piece[0] == current_way[-1]:
+                              current_way = current_way + way_piece[1:]
+                              del new_way_piece_list[key]
+                              found = True
+                            elif way_piece[-1] == current_way[0]:
+                              current_way = way_piece[:-1] + current_way
+                              del new_way_piece_list[key]
+                              found = True
+                          way_piece_list = deepcopy(new_way_piece_list)
+                        way_list.append(current_way)
+                      # Dereference nodes
+                      for way_id, way in enumerate(way_list):
+                        for position_id, position in enumerate(way):
+                          way_list[way_id][position_id] = node_list[position]
+                      # Get lowest distance
+                      min_distance = 1000000
+                      min_position = -1
+                      for index, way in enumerate(way_list):
+                        tmp_distance = util.distance_earth(subdataset_result['lat'], subdataset_result['lon'], way[0][0], way[0][1])
+                        if tmp_distance < min_distance:
+                          min_position = index
+                          min_distance = tmp_distance
+                      subdataset_result['area'] = json.dumps({'coordinates': way_list[min_position], 'type': 'LineString'})
+                    else:
+                      print "Warning: bad result at geosearch with %s " % overpass_url
+                      del subdataset_result['area']
                   else:
                     del subdataset_result['area']
                 else:

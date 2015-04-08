@@ -32,7 +32,11 @@ $(document).ready(function() {
 function get_construction_sites() {
   $.getJSON('/construction-list', function(result) {
     if (!markers) {
-      markers = new L.LayerGroup();
+      markers = new L.MarkerClusterGroup({
+        iconCreateFunction: function(cluster) {
+          return new L.DivIcon({ html: '<strong>' + cluster.getChildCount() + '</strong>', iconSize: [40, 50] });
+        }
+      });
       markers.addTo(map);
     }
     else
