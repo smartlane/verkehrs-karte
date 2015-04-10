@@ -611,7 +611,25 @@ class ZuerichStadt(DefaultSource):
         current_construction.lon = construction['geometry']['coordinates'][0][0][0]
       else:
         print "New geometry type found"
-      current_construction.area = json.dumps(construction['geometry'])
+      area = {
+        'type': construction['geometry']['type'],
+        'coordinates': []
+      }
+      if area['type'] == 'Polygon':
+        for latlon in construction['geometry']['coordinates'][0]:
+          area['coordinates'].append([latlon[1], latlon[0]])
+      elif area['type'] == 'MultiPolygon':
+        for latlonlist in construction['geometry']['coordinates'][0]:
+          latlonlist_result = []
+          for latlon in latlonlist:
+            latlonlist_result.append([latlon[1], latlon[0]])
+          area['coordinates'].append(latlonlist_result)
+      if len(construction['geometry']['coordinates']) == 1:
+        area['type'] = 'Polygon'
+        construction['geometry']['coordinates'] = construction['geometry']['coordinates'][0]
+      if len(construction['geometry']['coordinates']) == 1:
+        construction['geometry']['coordinates'] = construction['geometry']['coordinates'][0]
+      current_construction.area = json.dumps(area)
       current_construction.updated_at = datetime.datetime.now()
       # save data
       db.session.add(current_construction)

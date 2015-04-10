@@ -44,10 +44,12 @@ $(document).ready(function() {
             areas.clearLayers();
           $.each(result['response'], function(key, geojson) {
             if (geojson['area']['type'] == 'Polygon') {
-              
+              area = L.polyline(geojson['area']['coordinates'], {'color': '#FF3333', 'opacity': 1, 'fill': true})
+              areas.addLayer(area);
             }
             else if (geojson['area']['type'] == 'MultiPolygon') {
-              
+              area = L.multiPolyline(geojson['area']['coordinates'], {'color': '#FF3333', 'opacity': 1, 'fill': true})
+              areas.addLayer(area);
             }
             else if (geojson['area']['type'] == 'LineString') {
               area = L.polyline(geojson['area']['coordinates'], {'color': '#FF3333', 'opacity': 1});
