@@ -81,7 +81,36 @@ def construction_list():
   response.headers['Expires'] = -1
   response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
   return(response)
-  
+
+@app.route("/construction-area-list")
+def construction_area_list():
+  start_time = time.time()
+  n = request.args.get('n', 0)
+  w = request.args.get('w', 0)
+  e = request.args.get('e', 0)
+  s = request.args.get('s', 0)
+  constructions = ConstructionSite.query.filter(ConstructionSite.end > datetime.datetime.now()).filter(ConstructionSite.lat > s).filter(ConstructionSite.lat < n).filter(ConstructionSite.lon > w).filter(ConstructionSite.lon < e).all()
+  result = []
+  for construction in constructions:
+    if construction.area:
+      result.append({
+        'id': construction.id,
+        'area': json.loads(construction.area),
+      })
+  ret = {
+    'status': 0,
+    'duration': round((time.time() - start_time) * 1000),
+    'request': {},
+    'response': result
+  }
+  json_output = json.dumps(ret, cls=util.MyEncoder, sort_keys=False)
+  response = make_response(json_output, 200)
+  response.mimetype = 'application/json'
+  response.headers['Pragma'] = 'no-cache'
+  response.headers['Expires'] = -1
+  response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+  return(response)
+
 @app.route("/construction-details")
 def construction_details():
   start_time = time.time()

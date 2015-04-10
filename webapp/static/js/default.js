@@ -1,6 +1,7 @@
 
 var map;
 var markers;
+var areas;
 
 var current_construction_id = null;
 
@@ -25,6 +26,44 @@ $(document).ready(function() {
     if ($('#flashes').exists())
       close_sidebar();
     get_construction_sites();
+    
+    map.on('moveend', function() {
+      if (map.getZoom() > 10) {
+        bounds = map.getBounds()
+        $.getJSON('/construction-area-list', {
+          's': 2 * bounds.getSouth() - bounds.getNorth(),
+          'w': 2 * bounds.getWest() - bounds.getEast(),
+          'n': 2 * bounds.getNorth() - bounds.getSouth(),
+          'e': 2 * bounds.getEast() - bounds.getWest()
+        }).done(function(result) {
+          if (!areas) {
+            areas = new L.LayerGroup();
+            areas.addTo(map);
+          }
+          else
+            areas.clearLayers();
+          $.each(result['response'], function(key, geojson) {
+            if (geojson['area']['type'] == 'Polygon') {
+              
+            }
+            else if (geojson['area']['type'] == 'MultiPolygon') {
+              
+            }
+            else if (geojson['area']['type'] == 'LineString') {
+              area = L.polyline(geojson['area']['coordinates'], {'color': '#FF3333', 'opacity': 1});
+              areas.addLayer(area);
+            }
+            else
+              console.log('New GeoJSON detected');
+          });
+      });
+      }
+      else {
+        if (areas)
+          areas.clearLayers();
+      }
+    });
+    
   }
 });
 
