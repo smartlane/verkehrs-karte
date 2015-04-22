@@ -90,7 +90,7 @@ class DefaultSource():
   
   # openssl pkcs12 -in dev.ernestoruge.de.p12 -out package.pem -node
   def sync_mdm(self):
-    cmd = " wget -q --certificate misc/%s.crt --private-key misc/%s.key --ca-certificate misc/%s.chain.ca %s -O - | gunzip" % (app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], self.source_url)
+    cmd = "wget -q --certificate misc/%s.crt --private-key misc/%s.key --ca-certificate misc/%s.chain.ca %s -O - | gunzip" % (app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], self.source_url)
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = result.communicate()[0]
     data = ElementTree.fromstring(result)
@@ -216,8 +216,6 @@ class DefaultSource():
                   else:
                     del subdataset_result['location_descr']
                   if 'start' in subdataset_result['area'] and 'end' in subdataset_result['area']:
-                    #subdataset_result['area'] = "{\"coordinates\": [[%s, %s], [%s, %s]], \"type\": \"LineString\"}" % (subdataset_result['area']['start']['lat'], subdataset_result['area']['start']['lon'], subdataset_result['area']['end']['lat'], subdataset_result['area']['end']['lon'])
-                    
                     # We need the route from A to B to get the real construction site position
                     if subdataset_result['area']['start']['lat'] > subdataset_result['area']['end']['lat']:
                       route_n = subdataset_result['area']['start']['lat']
@@ -231,12 +229,10 @@ class DefaultSource():
                     else:
                       route_e = subdataset_result['area']['end']['lon']
                       route_w = subdataset_result['area']['start']['lon']
-                    if route_n == route_s:
-                      route_s -= 0.01
-                      route_n += 0.01
-                    if route_e == route_w:
-                      route_e -= 0.01
-                      route_w += 0.01
+                    route_s -= 0.05
+                    route_n += 0.05
+                    route_e += 0.05
+                    route_w -= 0.05
                     overpass_url = "http://www.overpass-api.de/api/interpreter?data=node(%s,%s,%s,%s);way(bn);way._[\"highway\"=\"motorway\"];(._;>;);out;" % (route_s, route_w, route_n, route_e)
                     overpass_result = requests.get(overpass_url)
                     overpass_data = ElementTree.fromstring(overpass_result.content)
@@ -292,9 +288,30 @@ class DefaultSource():
                         if tmp_distance < min_distance:
                           min_position = index
                           min_distance = tmp_distance
-                      subdataset_result['area'] = json.dumps({'coordinates': way_list[min_position], 'type': 'LineString'})
+                      # Find start point
+                      way_result = way_list[min_position]
+                      min_distance = 1000000
+                      min_position = -1
+                      for index, way_result_point in enumerate(way_result):
+                        current_distance = util.distance_earth(subdataset_result['area']['start']['lat'], subdataset_result['area']['start']['lon'], way_result_point[0], way_result_point[1])
+                        if current_distance < min_distance:
+                          min_distance = current_distance
+                          min_position = index
+                      way_result = way_result[min_position:]
+                      # Find end point
+                      min_distance = 1000000
+                      min_position = -1
+                      for index, way_result_point in enumerate(way_result):
+                        current_distance = util.distance_earth(subdataset_result['area']['end']['lat'], subdataset_result['area']['end']['lon'], way_result_point[0], way_result_point[1])
+                        if current_distance < min_distance:
+                          min_distance = current_distance
+                          min_position = index
+                      way_result = way_result[:min_position]
+                      subdataset_result['area'] = json.dumps({'coordinates': way_result, 'type': 'LineString'})
                     else:
                       print "Warning: bad result at geosearch with %s " % overpass_url
+                      print "Debug Info"
+                      print overpass_result.content
                       del subdataset_result['area']
                   else:
                     del subdataset_result['area']
@@ -874,6 +891,70 @@ class ThueringenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class SaarlandMdm(DefaultSource):
+  id = 18
+  title = u'Saarland (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2649000/clientPullService?subscriptionID=2649000'
+  contact_company = u'Landesbetrieb für Straßenbau Saarland (LfS)'
+  contact_name = u'Landesbetrieb für Straßenbau Saarland (LfS)'
+  contact_mail = u'-'
+  licence_name = u'gemeinfrei (CC-0)'
+  licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class RheinlandpfalzMdm(DefaultSource):
+  id = 19
+  title = u'Rheinland-Pfalz (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2647000/clientPullService?subscriptionID=2647000'
+  contact_company = u'Landesbetrieb Mobilität Rheinland-Pfalz'
+  contact_name = u'Landesbetrieb Mobilität Rheinland-Pfalz'
+  contact_mail = u'-'
+  licence_name = u'unbekannt'
+  licence_url = u''
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class SchleswigholsteinMdm(DefaultSource):
+  id = 20
+  title = u'Schlewsig-Holstein (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2648000/clientPullService?subscriptionID=2648000'
+  contact_company = u'Landesbetrieb Straßenbau und Verkehr Schleswig-Holstein'
+  contact_name = u'Landesbetrieb Straßenbau und Verkehr Schleswig-Holstein'
+  contact_mail = u'-'
+  licence_name = u'unbekannt'
+  licence_url = u''
+  active = True
+  mapping = {}
+  
+  def sync(self):
+    self.sync_mdm()
+
+class NiedersachsenMdm(DefaultSource):
+  id = 21
+  title = u'Niedersachsen (MDM)'
+  url = u'http://www.mdm-portal.de/'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2655000/clientPullService?subscriptionID=2655000'
+  contact_company = u'Landesbetrieb Straßenbau und Verkehr Schleswig-Holstein'
+  contact_name = u'Niedersächsische Landesbehörde für Straßenbau und Verkehr'
+  contact_mail = u'-'
+  licence_name = u'unbekannt'
+  licence_url = u''
   active = True
   mapping = {}
   
