@@ -1,5 +1,23 @@
 {% extends "bootstrap/base.html" %}
+
 {% block title %}Mobil Bei Uns{% endblock %}
+
+{% block head %}
+{{super()}}
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta name="description" content="{% block meta_description %}{% endblock %}" />
+<meta name="publisher" content="ruhrmobil-E e.V." />
+
+<meta property="og:title" content="Mobil Bei Uns" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://mobil-bei-uns.de" />
+<meta property="og:image" content="https://mobil-bei-uns.de/static/img/og.jpg" />
+<meta property="og:description" content="Mobil Bei Uns sammelt Verkehrsinformationen (z.B. Baustellen) und stellt diese nutzerfreundlich dar." />
+
+<link rel="icon" type="image/vnd.microsoft.icon" href="/static/img/favicon.ico" />
+<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="/static/img/favicon.ico" />
+{% endblock %}
 
 {% block styles %}
 {{super()}}
