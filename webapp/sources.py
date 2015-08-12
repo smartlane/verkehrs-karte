@@ -588,7 +588,7 @@ class ZuerichStadt(DefaultSource):
   id = 5
   title = u'Stadt Bonn'
   url = 'https://www.stadt-zuerich.ch/portal/de/index/ogd/daten/tiefbaustelle.html'
-  source_url = 'http://data.stadt-zuerich.ch/ogd.4vhCDPd.link'
+  source_url = 'https://data.stadt-zuerich.ch/storage/f/tiefbaustelle/tiefbaustelle.json'
   contact_company = u'Stadt Zürich'
   contact_name = u'Stadt Zürich'
   contact_mail = u'opendata@zuerich.ch'
