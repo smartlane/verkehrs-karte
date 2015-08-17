@@ -90,7 +90,10 @@ class DefaultSource():
   
   # openssl pkcs12 -in dev.ernestoruge.de.p12 -out package.pem -node
   def sync_mdm(self):
-    cmd = "wget -q --certificate misc/%s.crt --private-key misc/%s.key --ca-certificate misc/%s.chain.ca %s -O - | gunzip" % (app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], self.source_url)
+    if not self.active:
+        print 'This source is marked as inactive. Not syncing.'
+        return
+    cmd = "wget -q --certificate misc/%s.crt --private-key misc/%s.key --ca-certificate misc/%s.chain.ca --no-check-certificate %s -O - | gunzip" % (app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], self.source_url)
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = result.communicate()[0]
     data = ElementTree.fromstring(result)
@@ -731,7 +734,7 @@ class NordrheinwestfalenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -747,7 +750,7 @@ class BadenwuerttembergMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -757,7 +760,7 @@ class BayernMdm(DefaultSource):
   id = 9
   title = u'Bayern (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644005/clientPullService?subscriptionID=2644005'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2634000/clientPullService?subscriptionID=2634000'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -779,7 +782,7 @@ class BrandenburgMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -795,7 +798,7 @@ class BremenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -811,7 +814,7 @@ class HamburgMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -827,7 +830,7 @@ class HessenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -843,7 +846,7 @@ class MecklenburgvorpommernMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -859,7 +862,7 @@ class SachsenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -875,7 +878,7 @@ class SachsenanhaltMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -891,7 +894,7 @@ class ThueringenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -901,7 +904,7 @@ class SaarlandMdm(DefaultSource):
   id = 18
   title = u'Saarland (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2649000/clientPullService?subscriptionID=2649000'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2704002/clientPullService?subscriptionID=2704002'
   contact_company = u'Landesbetrieb für Straßenbau Saarland (LfS)'
   contact_name = u'Landesbetrieb für Straßenbau Saarland (LfS)'
   contact_mail = u'-'
@@ -923,7 +926,7 @@ class RheinlandpfalzMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'unbekannt'
   licence_url = u''
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -939,7 +942,7 @@ class SchleswigholsteinMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'unbekannt'
   licence_url = u''
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
@@ -955,7 +958,7 @@ class NiedersachsenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'unbekannt'
   licence_url = u''
-  active = True
+  active = False
   mapping = {}
   
   def sync(self):
