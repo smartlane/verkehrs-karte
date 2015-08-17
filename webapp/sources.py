@@ -734,7 +734,7 @@ class NordrheinwestfalenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -750,7 +750,7 @@ class BadenwuerttembergMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -782,7 +782,7 @@ class BrandenburgMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -798,7 +798,7 @@ class BremenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -814,7 +814,7 @@ class HamburgMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -830,7 +830,7 @@ class HessenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -846,7 +846,7 @@ class MecklenburgvorpommernMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -862,7 +862,7 @@ class SachsenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -878,7 +878,7 @@ class SachsenanhaltMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -894,7 +894,7 @@ class ThueringenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'gemeinfrei (CC-0)'
   licence_url = u'https://creativecommons.org/publicdomain/zero/1.0/'
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -926,7 +926,7 @@ class RheinlandpfalzMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'unbekannt'
   licence_url = u''
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -942,7 +942,7 @@ class SchleswigholsteinMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'unbekannt'
   licence_url = u''
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
@@ -958,7 +958,7 @@ class NiedersachsenMdm(DefaultSource):
   contact_mail = u'-'
   licence_name = u'unbekannt'
   licence_url = u''
-  active = False
+  active = True
   mapping = {}
   
   def sync(self):
