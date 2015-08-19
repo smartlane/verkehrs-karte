@@ -6,6 +6,9 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 SQLALCHEMY_DATABASE_URI = 'mysql://mysqluser:mysqlpassword@mysqlhost/mysqltable'
 SQLALCHEMY_MIGRATE_REPO = os.path.join(BASE_DIR, 'database')
 
+#How many retries for each sync when encountering exceptions
+RETRIES = 2
+
 #Debugging?
 DEBUG = True
 

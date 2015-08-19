@@ -62,8 +62,15 @@ def sync():
   for source_id, source_name in app.config['SOURCES'].iteritems():
     source_class = getattr(sources, source_name)
     source_object = source_class()
-    print "Syncing %s (ID %s)" % (source_name, source_id)
-    source_object.sync()
+    count = 0
+    success = False
+    while count < app.config['RETRIES'] and not success:
+      print "Syncing %s (ID %s) - attempt %s" % (source_name, source_id, str(count + 1))
+      try:
+        success = source_object.sync()
+        break
+      except:
+        count += 1
 
 def test():
   foo = sources.SaarlandMdm()
