@@ -362,6 +362,7 @@ class DefaultSource():
               # save data
               db.session.add(current_construction)
               db.session.commit()
+    return True #Alternative is an exception and not getting here            
   
   
   
@@ -416,6 +417,7 @@ class AachenStadt(DefaultSource):
       # save data
       db.session.add(current_construction)
       db.session.commit()
+    return True
 
 ###############
 ### Rostock ###
@@ -471,6 +473,7 @@ class RostockStadt(DefaultSource):
       # save data
       db.session.add(current_construction)
       db.session.commit()
+    return True
 
 ############
 ### Köln ###
@@ -532,6 +535,7 @@ class KoelnStadt(DefaultSource):
       # save data
       db.session.add(current_construction)
       db.session.commit()
+    return True
       
 ############
 ### Bonn ###
@@ -582,7 +586,8 @@ class BonnStadt(DefaultSource):
       # save data
       db.session.add(current_construction)
       db.session.commit()
-      
+    return True
+ 
 ##############
 ### Zürich ###
 ##############
@@ -654,7 +659,8 @@ class ZuerichStadt(DefaultSource):
       # save data
       db.session.add(current_construction)
       db.session.commit()
-  
+    return True
+ 
 ###############
 ### Hamburg ###
 ###############
@@ -719,6 +725,7 @@ class HamburgStadt(DefaultSource):
       # save data
       db.session.add(current_construction)
       db.session.commit()
+    return True
 
 #################
 ### NRW (MDM) ###
@@ -728,7 +735,7 @@ class NordrheinwestfalenMdm(DefaultSource):
   id = 7
   title = u'Nordrhein-Westfalen (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645005/clientPullService?subscriptionID=2645005'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705010/clientPullService?subscriptionID=2705010'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -738,13 +745,13 @@ class NordrheinwestfalenMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class BadenwuerttembergMdm(DefaultSource):
   id = 8
   title = u'Baden-Württemberg (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644004/clientPullService?subscriptionID=2644004'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705004/clientPullService?subscriptionID=2705004'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -754,7 +761,7 @@ class BadenwuerttembergMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class BayernMdm(DefaultSource):
   id = 9
@@ -770,13 +777,13 @@ class BayernMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class BrandenburgMdm(DefaultSource):
   id = 10
   title = u'Brandenburg (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644006/clientPullService?subscriptionID=2644006'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705005/clientPullService?subscriptionID=2705005'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -786,13 +793,13 @@ class BrandenburgMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class BremenMdm(DefaultSource):
   id = 11
   title = u'Bremen (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2644007/clientPullService?subscriptionID=2644007'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705006/clientPullService?subscriptionID=2705006'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -802,13 +809,13 @@ class BremenMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class HamburgMdm(DefaultSource):
   id = 12
   title = u'Hamburg (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645002/clientPullService?subscriptionID=2645002'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705007/clientPullService?subscriptionID=2705007'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -818,13 +825,13 @@ class HamburgMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class HessenMdm(DefaultSource):
   id = 13
   title = u'Hessen (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645003/clientPullService?subscriptionID=2645003'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705008/clientPullService?subscriptionID=2705008'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -834,13 +841,13 @@ class HessenMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class MecklenburgvorpommernMdm(DefaultSource):
   id = 14
   title = u'Mecklenburg-Vorpommern (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645004/clientPullService?subscriptionID=2645004'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705009/clientPullService?subscriptionID=2705009'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -850,13 +857,13 @@ class MecklenburgvorpommernMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class SachsenMdm(DefaultSource):
   id = 15
   title = u'Sachsen (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645006/clientPullService?subscriptionID=2645006'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705011/clientPullService?subscriptionID=2705011'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -866,13 +873,13 @@ class SachsenMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class SachsenanhaltMdm(DefaultSource):
   id = 16
   title = u'Sachsen-Anhalt (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645007/clientPullService?subscriptionID=2645007'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705012/clientPullService?subscriptionID=2705012'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -882,13 +889,13 @@ class SachsenanhaltMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class ThueringenMdm(DefaultSource):
   id = 17
   title = u'Thüringen (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2645008/clientPullService?subscriptionID=2645008'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2705013/clientPullService?subscriptionID=2705013'
   contact_company = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_name = u'Baustelleninformationssystem des Bundes und der Länder'
   contact_mail = u'-'
@@ -898,7 +905,7 @@ class ThueringenMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class SaarlandMdm(DefaultSource):
   id = 18
@@ -914,7 +921,7 @@ class SaarlandMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class RheinlandpfalzMdm(DefaultSource):
   id = 19
@@ -930,7 +937,7 @@ class RheinlandpfalzMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class SchleswigholsteinMdm(DefaultSource):
   id = 20
@@ -946,7 +953,7 @@ class SchleswigholsteinMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
 
 class NiedersachsenMdm(DefaultSource):
   id = 21
@@ -962,4 +969,4 @@ class NiedersachsenMdm(DefaultSource):
   mapping = {}
   
   def sync(self):
-    self.sync_mdm()
+    return self.sync_mdm()
