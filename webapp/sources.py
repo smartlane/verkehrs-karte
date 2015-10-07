@@ -94,6 +94,7 @@ class DefaultSource():
         print 'This source is marked as inactive. Not syncing.'
         return
     cmd = "wget -q --certificate misc/%s.crt --private-key misc/%s.key --ca-certificate misc/%s.chain.ca --no-check-certificate %s -O - | gunzip" % (app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], app.config['MDM_CERT_FILE'], self.source_url)
+    print "Using cmd: " + cmd
     result = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = result.communicate()[0]
     data = ElementTree.fromstring(result)
@@ -313,8 +314,8 @@ class DefaultSource():
                       subdataset_result['area'] = json.dumps({'coordinates': way_result, 'type': 'LineString'})
                     else:
                       print "Warning: bad result at geosearch with %s " % overpass_url
-                      print "Debug Info"
-                      print overpass_result.content
+                      #print "Debug Info"
+                      #print overpass_result.content
                       del subdataset_result['area']
                   else:
                     del subdataset_result['area']
@@ -927,7 +928,7 @@ class RheinlandpfalzMdm(DefaultSource):
   id = 19
   title = u'Rheinland-Pfalz (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2647000/clientPullService?subscriptionID=2647000'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2711002/clientPullService?subscriptionID=2711002'
   contact_company = u'Landesbetrieb Mobilität Rheinland-Pfalz'
   contact_name = u'Landesbetrieb Mobilität Rheinland-Pfalz'
   contact_mail = u'-'
@@ -943,7 +944,7 @@ class SchleswigholsteinMdm(DefaultSource):
   id = 20
   title = u'Schlewsig-Holstein (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2648000/clientPullService?subscriptionID=2648000'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2714000/clientPullService?subscriptionID=2714000'
   contact_company = u'Landesbetrieb Straßenbau und Verkehr Schleswig-Holstein'
   contact_name = u'Landesbetrieb Straßenbau und Verkehr Schleswig-Holstein'
   contact_mail = u'-'
@@ -959,7 +960,7 @@ class NiedersachsenMdm(DefaultSource):
   id = 21
   title = u'Niedersachsen (MDM)'
   url = u'http://www.mdm-portal.de/'
-  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2655000/clientPullService?subscriptionID=2655000'
+  source_url = u'https://service.mac.mdm-portal.de/BASt-MDM-Interface/srv/2714003/clientPullService?subscriptionID=2714003'
   contact_company = u'Landesbetrieb Straßenbau und Verkehr Schleswig-Holstein'
   contact_name = u'Niedersächsische Landesbehörde für Straßenbau und Verkehr'
   contact_mail = u'-'
