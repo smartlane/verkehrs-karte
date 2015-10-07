@@ -256,7 +256,7 @@ class DefaultSource():
                               if subitem.attrib['k'] == 'ref':
                                 steet_name = subitem.attrib['v']
                         # just add when it's the right street name
-                        if steet_name.replace(' ', '') == subdataset_result['street']:
+                        if 'street' in subdataset_result and steet_name.replace(' ', '') == subdataset_result['street']:
                           way_piece_list[item.attrib['id']] = current_way
                     # Chain ways
                     way_list = []
