@@ -18,7 +18,15 @@ cd /mein/mobil-bei-uns/ordner/
 git clone https://github.com/OpenRuhr/mobil-bei-uns.git .
 ```
 
+Des weiteren müss das Virtual Enviroment erstellt werden:
 
+```
+cd /mein/mobil-bei-uns/ordner/
+virtualenv --no-site-packages venv
+source venv/bin/activate
+pip install -upgrade pip setuptools
+pip install -r requirements.txt
+```
 
 ## Anbindung des Mobilitäts Daten Marktplatzes MDM
 
@@ -38,21 +46,32 @@ openssl rsa -in mein-zertifikat.enc.key -out mein-zertifikat.key
 
 Außerdem wird noch die Location Code List benötigt. Diese kann [auf den Seiten des BASt beantragt werden](http://www.bast.de/DE/Verkehrstechnik/Fachthemen/v2-LCL/location-code-list-nutzungsbedingungen.html).
 
-Um die Flask-Anwendung selbst zu starten, wird ein Virtual Enviroment mit den in der requirements.txt enthaltenen Paketen benötigt:
-
-```
-cd /mein/mobil-bei-uns/ordner/
-virtualenv --no-site-packages venv
-source venv/bin/activate
-pip install -upgrade pip setuptools
-pip install -r requirements.txt
-```
 
 ## Datenbank
 
 Anschließend muss die Datenbank initialisiert und migriert werden. Dies geschieht mit Hilfe von Flask-Migrate über das CLI-Interface manage.py :
 
 ```
+source venv/bin/activate
 python manage.py db init
 python manage.py db migrate
+python manage.py db upgrade
 ```
+
+## Nutzung
+
+Um die Baustellen von den verschiedenen Quellen abzuholen, wird das Sync-Script aufgerufen:
+
+```
+source venv/bin/activate
+python manage.py sync
+```
+
+Anschließend kann die Webanwendung gestartet werden:
+
+```
+source venv/bin/activate
+pyton runserver.py
+```
+
+Unter http://server-url:5000 kann dann Mobil bei Uns abgerufen werden. Auf einem produktiven Server empfiehlt sich der Einsatz von [gunicorn](http://gunicorn.org/).
