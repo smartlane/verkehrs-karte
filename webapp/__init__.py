@@ -10,7 +10,6 @@ from werkzeug.contrib.cache import MemcachedCache
 
 
 app = Flask(__name__)
-app.debug = True
 app.config.from_pyfile('../config.py')
 
 # Bootstrap
@@ -27,7 +26,7 @@ mail = Mail(app)
 
 db = SQLAlchemy(app)
 from models import *
-#from forms import *
+from forms import *
 
 import sources
 app.config['REGION_DATA'] = {}

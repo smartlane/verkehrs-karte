@@ -2,7 +2,7 @@
 
 Verkehrskarte.de stellt aktuelle Baustelleninformationen für Moers dar. Ziel ist es über Schnittstellen zukünftig Informationen für weitere Städte anzubinden.
 
-####Copyrightfu
+####Copyright
 Copyright (c) 2014 Ernesto Ruge
 
 Hiermit wird unentgeltlich jeder Person, die eine Kopie der Software und
