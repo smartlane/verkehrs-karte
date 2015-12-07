@@ -23,6 +23,7 @@ im Zusammenhang mit der Software oder sonstiger Verwendung der Software
 entstanden.
 """
 
+import traceback
 import datetime
 import calendar
 import email.utils
@@ -71,6 +72,7 @@ def sync():
         break
       except:
         count += 1
+        print 'Failed:\n' + traceback.format_exc()
 
 def test():
   foo = sources.SaarlandMdm()

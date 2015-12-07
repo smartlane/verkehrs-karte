@@ -6,6 +6,7 @@ var areas;
 var current_construction_id = null;
 
 $(document).ready(function() {
+  close_sidebar();
   if ($('#map').exists()) {
     $('.scrollable-menu').css({'max-height': $( window ).height() - 74 });
     $('#menu-collapse').css({'max-height': $( window ).height() - 74 });
@@ -14,7 +15,7 @@ $(document).ready(function() {
       region_id = $(this).data('regionid');
       map.setView(new L.LatLng(regions[region_id]['lat'], regions[region_id]['lon']), regions[region_id]['zoom']);
     });
-    var ConstructionIcon = L.Icon.Default.extend({ options: { iconUrl: '/static/img/under_construction_icon.png', iconSize: [40, 35] } });
+    var ConstructionIcon = L.Icon.Default.extend({ options: { iconUrl: 'https://smartlane.io/baustellen/static/img/under_construction_icon.png', iconSize: [40, 35] } });
     constructionIcon = new ConstructionIcon();
     map = new L.Map('map', { attributionControl: false });
     var backgroundLayer = new L.TileLayer('https://otile1-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
@@ -30,7 +31,7 @@ $(document).ready(function() {
     map.on('moveend', function() {
       if (map.getZoom() > 10) {
         bounds = map.getBounds()
-        $.getJSON('/construction-area-list', {
+        $.getJSON('construction-area-list', {
           's': 2 * bounds.getSouth() - bounds.getNorth(),
           'w': 2 * bounds.getWest() - bounds.getEast(),
           'n': 2 * bounds.getNorth() - bounds.getSouth(),
@@ -71,7 +72,7 @@ $(document).ready(function() {
 
 
 function get_construction_sites() {
-  $.getJSON('/construction-list', function(result) {
+  $.getJSON('construction-list', function(result) {
     if (!markers) {
       markers = new L.MarkerClusterGroup({
         iconCreateFunction: function(cluster) {
@@ -88,7 +89,7 @@ function get_construction_sites() {
         if ($('#flashes').exists())
           $('#flashes').remove();
         current_marker_id = current_marker['target']['options']['title'];
-        $.getJSON('/construction-details?id=' + current_marker_id, function(result) {
+        $.getJSON('construction-details?id=' + current_marker_id, function(result) {
           $("#details").animate({width:"290px"});
           construction = result['response'];
           current_construction_id = construction['id'];
