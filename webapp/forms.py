@@ -1,5 +1,15 @@
 # encoding: utf-8
 
+"""
+Copyright (c) 2012 - 2015, Ernesto Ruge
+All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 from flask.ext.wtf import Form
 from wtforms import validators
 from models import *
@@ -7,69 +17,3 @@ from wtforms import SubmitField, TextField, SelectField, FileField, TextAreaFiel
 from wtforms.widgets import FileInput
 from webapp import app, db
 import util
-
-class ImageFileInput(FileInput):
-  def __init__(self):
-    super(ImageFileInput, self).__init__()
-
-  def __call__(self, field, **kwargs):
-    kwargs['accept'] = 'image/*'
-    kwargs['capture'] = ''
-    return super(ImageFileInput, self).__call__(field, **kwargs)
-  
-class NewTree(Form):
-  author = TextField(
-    label='Ihr Name',
-    validators=[
-      validators.Required(message=u'Ihr Name wird für eventuelle Rückfragen benötigt.'),
-      validators.Length(min=6, max=255, message='Ihr Name ist zu kurz (Minimum 6 Zeichen).')
-    ],
-    description=u'Wird nicht veröffentlicht oder weitergegeben. Wird für eventuelle Rückfragen benötigt.')
-  email = TextField(
-    label='Ihre E-Mail Adresse',
-    validators=[
-      validators.Required(message=u'Ihre Mailadresse wird für eventuelle Rückfragen benötigt.'),
-      validators.Length(max=255),
-      validators.Email('Bitte geben Sie eine korrekte Mailadresse an.')
-    ],
-    description=u'Wird nicht veröffentlicht oder weitergegeben. Wird für eventuelle Rückfragen benötigt.')
-  type = SelectField(
-    label=u'Art der Meldung',
-    choices=[
-      ('0', u'bitte auswählen'),
-      ('1', u'Baum gefällt, noch nicht wieder neu gepflanzt'),
-      ('2', u'Baum gefällt und neu gepflanzt'),
-      ('3', u'Vorschlag für einen neuen Baum')],
-    validators = [
-      validators.Required(message=u'Bitte geben Sie an welchen Vorschlag Sie machen möchten.')
-    ],
-    description='')
-  address = TextField(
-    label=u'Straße und Hausnummer',
-    validators=[
-      validators.Required(message=u'Eine Adresse wird benötigt.'),
-      validators.Length(max=255)
-    ],
-    description=u'Straße und Hausnummer in Bochum zur Lokalisierung')
-  descr = TextAreaField(
-    label=u'Zusatzinformationen',
-    validators=[validators.Length(max=32000)],
-    description='')
-  picture = FileField(
-    label = 'Bild',
-    description=u'JPG-Datei. Zeigen Sie mit einem Bild welchen Ort genau Sie meinen. Mit dem Upload bestätigen Sie, dass das Bild von dieser Website verwendet werden kann (<a href="/impressum#datenverwendung">Hintergründe / AGB</a>).',
-    widget = ImageFileInput())
-  lat = HiddenField(
-    validators=[
-      validators.Required(message='Leider ist die Geolokalisierung fehlgeschlagen. Bitte setzen Sie den Marker auf der Karte.')
-    ],
-  )
-  lng = HiddenField(
-    validators=[validators.Required(message='')],
-  )
-  postalcode = HiddenField(
-    validators=[validators.Required(message='')],
-  )
-  submit = SubmitField(
-    label=u'Daten speichern')
-  

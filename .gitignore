@@ -17,10 +17,6 @@ config.py
 ._*
 *~
 
-webapp/static/img/tree
-tree-suggest/*
 
-database
-alembic.ini
-alembic
+migrations
 

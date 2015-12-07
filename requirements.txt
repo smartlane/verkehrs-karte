@@ -7,11 +7,11 @@ Flask-MySQL
 Flask-BasicAuth
 Flask-Security
 Flask-Script
+Flask-Migrate
 utm
 python-memcached
 requests
 bson
-sqlalchemy-migrate
 lxml
 cssselect
 python-dateutil
